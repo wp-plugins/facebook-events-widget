@@ -26,6 +26,10 @@ you need to edit the settings.
 
 In container height fill the value 'auto'.
 
+= How to use the background color of the theme? =
+
+In background color fill the value 'inherit'.
+
 == Screenshots ==
 
 1. example
