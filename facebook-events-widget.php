@@ -32,6 +32,7 @@ Copyright 2011  Roi Dayan  (email : roi.dayan@gmail.com)
  * setting if to display more info or not
  * link to all events
  * setting for date format for one day event and event that span multiple days
+ * force height for widget container
 */
 
 //error_reporting(E_ALL);
