@@ -4,7 +4,7 @@ Donate link: http://roidayan.com
 Tags: events, facebook
 Requires at least: 3.2.1
 Tested up to: 3.2.1
-Stable tag: 1.0
+Stable tag: 1.0.1
 
 A widget for displaying facebook events of a fan page.
 
@@ -35,6 +35,9 @@ In background color fill the value 'inherit'.
 1. example
 
 == Changelog ==
+
+= 1.0.1 =
+* fixed bug in echo statement.
 
 = 1.0 =
 * first
