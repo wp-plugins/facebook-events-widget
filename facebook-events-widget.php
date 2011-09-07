@@ -142,8 +142,8 @@ class Facebook_Events_Widget extends WP_Widget {
 	function create_input($key, $value, $title, $type='text') {
 		$name = $this->get_field_name($key);
 		$id = $this->get_field_id($key);
-		echo '<p><label for="' . $name . '">' . __($title) .
-		' <input id="' . $id . '" name="' . $name . '" type="' . $type . '" ';
+		echo '<p><label for="' . $name . '">' . __($title);
+		echo ' <input id="' . $id . '" name="' . $name . '" type="' . $type . '" ';
 		if ($type == 'checkbox')
 			checked( (bool) $value, true);
 		else
