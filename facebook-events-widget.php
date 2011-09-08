@@ -48,6 +48,7 @@ class Facebook_Events_Widget extends WP_Widget {
 		'pageId' => '',
 		'appId' => '',
 		'appSecret' => '',
+		'access_token' => '',
 		'eventHeight' => '110px',
 		'containerHeight' => '125px',
 		'backColor' => '#E3E3E3',
@@ -129,6 +130,8 @@ class Facebook_Events_Widget extends WP_Widget {
 		$this->create_input('pageId', $pageId, 'Facebook Page ID:');
 		$this->create_input('appId', $appId, 'Facebook App ID:');
 		$this->create_input('appSecret', $appSecret, 'Facebook App secret:');
+		//$this->create_input('access_token', $appSecret, 'Access token:');
+		//echo 'Click here to get access token';
 		$this->create_input('eventHeight', $eventHeight, 'Event Height:');
 		$this->create_input('containerHeight', $containerHeight, 'Container Height:');
 		$this->create_input('backColor', $backColor, 'Background Color:', 'color');
@@ -183,6 +186,7 @@ class Facebook_Events_Widget extends WP_Widget {
 			'query' => $fql,
 			'callback' => ''
 		);
+		// access_token
 
 		$fqlResult = '';
 
