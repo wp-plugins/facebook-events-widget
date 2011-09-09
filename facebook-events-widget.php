@@ -270,7 +270,7 @@ class Facebook_Events_Widget extends WP_Widget {
 
 		//printing the data
 		echo "<div class='fb-event'>";
-		echo '<a class="fb-event-anchor" href="' . urlencode($event_url) . '"><div>';
+		echo '<a class="fb-event-anchor" href="' . $event_url . '"><div>';
 		echo "<img src={$values['pic']} />";
 		echo "<div class='fb-event-title'>{$values['name']}</div>";
 		if ($start_date == $end_date) {
