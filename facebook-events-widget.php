@@ -82,14 +82,12 @@ class Facebook_Events_Widget extends WP_Widget {
 		$instance = wp_parse_args(
 			(array) $instance,
 			$this->default_settings
-			);
+		);
 		extract($instance, EXTR_SKIP);
-
 		$title = apply_filters('widget_title', empty($title) ? 'Facebook Events' : $title);
 		$all_events_url = "http://www.facebook.com/pages/{$pageId}/?sk=events";
 
 		echo $before_widget;
-
 		if ($title)
 			echo $before_title . $title . $after_title;
 
@@ -272,7 +270,7 @@ class Facebook_Events_Widget extends WP_Widget {
 
 		//printing the data
 		echo "<div class='fb-event'>";
-		echo "<a class='fb-event-anchor' href='$event_url'><div>";
+		echo '<a class="fb-event-anchor" href="' . urlencode($event_url) . '"><div>';
 		echo "<img src={$values['pic']} />";
 		echo "<div class='fb-event-title'>{$values['name']}</div>";
 		if ($start_date == $end_date) {
