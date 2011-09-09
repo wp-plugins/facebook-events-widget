@@ -3,7 +3,7 @@
 Plugin Name: Facebook Events Widget
 Plugin URI: http://roidayan.com
 Description: Widget to display facebook events
-Version: 1.0.1
+Version: 1.1.0
 Author: Roi Dayan
 Author URI: http://roidayan.com
 License: GPL2
@@ -48,7 +48,7 @@ class Facebook_Events_Widget extends WP_Widget {
 		'pageId' => '',
 		'appId' => '',
 		'appSecret' => '',
-		'access_token' => '',
+		'accessToken' => '',
 		'eventHeight' => '110px',
 		'containerHeight' => '125px',
 		'backColor' => '#E3E3E3',
@@ -71,6 +71,9 @@ class Facebook_Events_Widget extends WP_Widget {
 			);
 		$this->WP_Widget('facebook_events_widget',
 			__('Facebook Events Widget'), $widget_ops, $control_ops);
+			
+		//$this->admin_url = admin_url('admin.php?page=' . urlencode(plugin_basename(__FILE__)));
+		$this->admin_url = admin_url('widgets.php');
 	}
 
 	function widget($args, $instance) {
@@ -92,7 +95,7 @@ class Facebook_Events_Widget extends WP_Widget {
 
 		$this->echo_css_style($containerHeight, $eventHeight, $backColor, $hoverColor);
 
-		$fqlResult = $this->query_fb_page_events($appId, $appSecret, $pageId, $maxEvents, $futureEvents);
+		$fqlResult = $this->query_fb_page_events($appId, $appSecret, $pageId, $accessToken, $maxEvents, $futureEvents);
 
 		echo '<div class="fb-events-container">';
 		//looping through retrieved data
@@ -122,7 +125,7 @@ class Facebook_Events_Widget extends WP_Widget {
 		$instance = wp_parse_args(
 			(array) $instance,
 			$this->default_settings
-			);
+		);
 		extract($instance, EXTR_SKIP);
 		$title = htmlspecialchars($instance['title']);
 
@@ -130,8 +133,24 @@ class Facebook_Events_Widget extends WP_Widget {
 		$this->create_input('pageId', $pageId, 'Facebook Page ID:');
 		$this->create_input('appId', $appId, 'Facebook App ID:');
 		$this->create_input('appSecret', $appSecret, 'Facebook App secret:');
-		//$this->create_input('access_token', $appSecret, 'Access token:');
-		//echo 'Click here to get access token';
+		
+		if (!empty($appId) && !empty($appSecret) && empty($accessToken) &&
+			isset($_GET['wid']) && isset($_GET['code']) && $_GET['wid'] == $this->id)
+		{
+			$accessToken = $this->get_facebook_access_token($appId, $appSecret, $_GET['code']);
+		}
+		
+		$this->create_input('accessToken', $accessToken, 'Access token:');
+		
+		if (empty($access_token)) {
+			echo '<p><a class="button-secondary"';
+			echo 'href="https://www.facebook.com/dialog/oauth?client_id=';
+			echo urlencode($appId);
+			echo '&redirect_uri=' . urlencode($this->admin_url.'?wid=' . $this->id);
+			echo '&scope=' . urlencode('offline_access,user_events') . '">';
+			echo __('Get facebook access token') . '</a></p>';
+		}
+		
 		$this->create_input('eventHeight', $eventHeight, 'Event Height:');
 		$this->create_input('containerHeight', $containerHeight, 'Container Height:');
 		$this->create_input('backColor', $backColor, 'Background Color:', 'color');
@@ -141,7 +160,26 @@ class Facebook_Events_Widget extends WP_Widget {
 		$this->create_input('futureEvents', $futureEvents, 'Show Future Events Only:', 'checkbox');
 		$this->create_input('timeOffset', $timeOffset, 'Adjust facebook times in hours:', 'number');
 	}
-
+	
+	function get_facebook_access_token($appId, $appSecret, $code) {
+		$request = new WP_Http;
+		$api_url = 'https://graph.facebook.com/oauth/access_token?client_id='.urlencode($appId).'&redirect_uri=' . urlencode($this->admin_url . '?wid=' . $this->id) . '&client_secret=' . urlencode($appSecret) . '&code=' . urlencode($code);
+		$response = $request->get($api_url);
+		if (isset($response->errors))
+			return false;
+		$json_response = json_decode($response['body']);
+		if (is_object($json_response) && property_exists($json_response,'error')) {
+			echo '<p style="color: red;">Error getting access token.</p>';
+			return false;
+		}
+		$token = explode('=', $response['body'], 2);
+		if ($token[0] != 'access_token') {
+			echo '<p style="color: red;">Error with access token.</p>';
+			return false;
+		}
+		return $token[1];
+	}
+	
 	function create_input($key, $value, $title, $type='text') {
 		$name = $this->get_field_name($key);
 		$id = $this->get_field_id($key);
@@ -154,7 +192,7 @@ class Facebook_Events_Widget extends WP_Widget {
 		echo ' /></label></p>';
 	}
 
-	function query_fb_page_events($appId, $appSecret, $pageId, $maxEvents, $futureOnly=false) {
+	function query_fb_page_events($appId, $appSecret, $pageId, $accessToken, $maxEvents, $futureOnly=false) {
 		//initializing keys
 		$facebook = new Facebook(array(
 			'appId'  => $appId,
@@ -180,13 +218,15 @@ class Facebook_Events_Widget extends WP_Widget {
 			FROM event WHERE eid IN ( SELECT eid FROM event_member 
 			WHERE uid = '{$pageId}' ) {$future}
 			ORDER BY start_time ASC LIMIT {$maxEvents}";
-
+		
 		$param = array (
 			'method' => 'fql.query',
 			'query' => $fql,
 			'callback' => ''
 		);
-		// access_token
+		
+		if (!empty($accessToken))
+			$param['access_token'] = $accessToken;
 
 		$fqlResult = '';
 
