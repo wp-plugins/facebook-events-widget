@@ -49,10 +49,6 @@ class Facebook_Events_Widget extends WP_Widget {
         'appId' => '',
         'appSecret' => '',
         'accessToken' => '',
-        'eventHeight' => '110px',
-        'containerHeight' => '125px',
-        'backColor' => '#E3E3E3',
-        'hoverColor' => '#CCC',
         'maxEvents' => 10,
         'smallPic' => false,
         'futureEvents' => false,
@@ -71,11 +67,24 @@ class Facebook_Events_Widget extends WP_Widget {
             'width' => '',
             'height' => ''
             );
+        
         $this->WP_Widget('facebook_events_widget',
             __('Facebook Events Widget'), $widget_ops, $control_ops);
             
         //$this->admin_url = admin_url('admin.php?page=' . urlencode(plugin_basename(__FILE__)));
         $this->admin_url = admin_url('widgets.php');
+        
+        add_action('init', array($this, 'add_style'));
+    }
+    
+    function add_style() {
+        if (!is_admin()) {
+            //$url = plugins_url( null, $this );
+            $cwd = dirname(__FILE__);
+			$url = str_replace($_SERVER['DOCUMENT_ROOT'],'',$cwd);
+            wp_enqueue_style('facebook-events-style', $url . '/style.css',
+                                false, '1.0', 'all');
+        }
     }
 
     function widget($args, $instance) {
@@ -93,22 +102,23 @@ class Facebook_Events_Widget extends WP_Widget {
         if ($title)
             echo $before_title . $title . $after_title;
 
-        $this->echo_css_style($containerHeight, $eventHeight, $backColor, $hoverColor);
-
         $fqlResult = $this->query_fb_page_events($appId, $appSecret, $pageId,
                         $accessToken, $maxEvents, $futureEvents);
 
         echo '<div class="fb-events-container">';
-        //looping through retrieved data
-        $last_sep = '';
-        foreach ($fqlResult as $keys => $values) {
-            if ($smallPic)
-                $values['pic'] = $values['pic_small'];
-            if ($calSeparate)
-                $last_sep = $this->cal_event($values, $last_sep);
-            $this->create_event_div_block($values, $timeOffset, $newWindow);
+        
+        # looping through retrieved data
+        if (!empty($fqlResult)) {
+            $last_sep = '';
+            foreach ($fqlResult as $keys => $values) {
+                if ($smallPic)
+                    $values['pic'] = $values['pic_small'];
+                if ($calSeparate)
+                    $last_sep = $this->cal_event($values, $timeOffset, $last_sep);
+                $this->create_event_div_block($values, $instance);
+            }
+            echo '</div>';
         }
-        echo '</div>';
 
         echo $after_widget;
     }
@@ -146,7 +156,7 @@ class Facebook_Events_Widget extends WP_Widget {
         echo '*Only needed if calendar is private.<br/><br/>';
         
         if (empty($access_token)) {
-            echo '<p><a class="button-secondary"';
+            echo '<p><a class="button-secondary" ';
             echo 'href="https://www.facebook.com/dialog/oauth?client_id=';
             echo urlencode($appId);
             echo '&redirect_uri=' . urlencode($this->admin_url.'?wid=' . $this->id);
@@ -154,16 +164,14 @@ class Facebook_Events_Widget extends WP_Widget {
             echo __('Get facebook access token') . '</a></p>';
         }
         
-        $this->create_input('eventHeight', $eventHeight, 'Event Height:');
-        $this->create_input('containerHeight', $containerHeight, 'Container Height:');
-        $this->create_input('backColor', $backColor, 'Background Color:', 'color');
-        $this->create_input('hoverColor', $hoverColor, 'Hover Color:', 'color');
         $this->create_input('maxEvents', $maxEvents, 'Maximum Events:', 'number');
         $this->create_input('smallPic', $smallPic, 'Use Small Picture:', 'checkbox');
         $this->create_input('futureEvents', $futureEvents, 'Show Future Events Only:', 'checkbox');
         $this->create_input('timeOffset', $timeOffset, 'Adjust events times in hours:', 'number');
         $this->create_input('newWindow', $newWindow, 'Open events in new window:', 'checkbox');
         $this->create_input('calSeparate', $calSeparate, 'Show calendar separators:', 'checkbox');
+        
+        echo '*To edit the style you need to edit the style.css file.<br/><br/>';
     }
     
     function get_facebook_access_token($appId, $appSecret, $code) {
@@ -256,7 +264,7 @@ class Facebook_Events_Widget extends WP_Widget {
         return $fqlResult;
     }
 
-    function cal_event($values, $last_sep = '') {
+    function cal_event($values, $timeOffset = 0, $last_sep = '') {
         //adjust facebook timestamp offset
         if ($timeOffset > 0) {
             $o = $timeOffset * 3600;
@@ -317,11 +325,9 @@ class Facebook_Events_Widget extends WP_Widget {
         return $r;
     }
     
-    function create_event_div_block(
-                    $values,
-                    $timeOffset = 0,
-                    $newWindow = false)
-    {
+    function create_event_div_block($values, $instance) {
+        extract($instance, EXTR_SKIP);
+        
         //see here http://php.net/manual/en/function.date.php for the date format I used
         //The pattern string I used 'l, F d, Y g:i a'
         //will output something like this: July 30, 2015 6:30 pm
@@ -385,65 +391,6 @@ class Facebook_Events_Widget extends WP_Widget {
         //echo "<div style='clear: both'></div>";
         echo "</div></a>";
         echo "</div>";
-    }
-
-    function echo_css_style($containerHeight, $eventHeight, $backColor, $hoverColor) {
-        # output css
-?>
-<style type='text/css'>
-    .fb-events-container {
-        <?php if ($containerHeight != 'auto'): ?>
-        overflow: auto;
-        overflow-x: hidden;
-        height: <?php echo $containerHeight; ?>;
-        <?php endif; ?>
-    }
-    .fb-event {
-        background-color: <?php echo $backColor; ?>;
-        border: 1px solid;
-        overflow: hidden;
-        margin: 0 0 5px 0;
-        padding: 5px;
-        font-family: arial, verdana, courier;
-        height: <?php echo $eventHeight; ?>;
-        font-size: 11px;
-        line-height: 22px;
-    }
-    .fb-event a {
-        text-decoration: none;
-        color: inherit;
-    }
-    .fb-event:hover {
-        background-color: <?php echo $hoverColor; ?>;
-    }
-    .fb-event img {
-        float: left;
-    }
-    .fb-event-title {
-        font-size: 16px;
-        font-weight: bold;
-    }
-    .fb-event-time {
-        line-height: 10px;
-    }
-    .fb-event-location {
-    }
-    .fb-event-description {
-        line-height: 10px;
-    }
-    .fb-event-cal-head {
-        font-size: 11px;
-        color: #333;
-        background-color: #F2F2F2;
-        border-top: solid 1px #E2E2E2;
-        padding: 4px 6px 5px;
-        border-bottom: none;
-        font-weight: bold;
-        line-height: 1.28;
-    }
-</style>
-<?php
-        # end echo_css_style()
     }
 }
 
