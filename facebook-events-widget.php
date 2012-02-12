@@ -79,7 +79,7 @@ class Facebook_Events_Widget extends WP_Widget {
     
     function add_style() {
         if (!is_admin()) {
-            wp_enqueue_style('facebook-events-style',
+            wp_enqueue_style('facebook-events',
                             plugin_dir_url(__FILE__).'style.css',
                             false, '1.0', 'all');
         }
