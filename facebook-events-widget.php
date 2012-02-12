@@ -79,11 +79,9 @@ class Facebook_Events_Widget extends WP_Widget {
     
     function add_style() {
         if (!is_admin()) {
-            //$url = plugins_url( null, $this );
-            $cwd = dirname(__FILE__);
-			$url = str_replace($_SERVER['DOCUMENT_ROOT'],'',$cwd);
-            wp_enqueue_style('facebook-events-style', $url . '/style.css',
-                                false, '1.0', 'all');
+            wp_enqueue_style('facebook-events-style',
+                            plugin_dir_url(__FILE__).'style.css',
+                            false, '1.0', 'all');
         }
     }
 
