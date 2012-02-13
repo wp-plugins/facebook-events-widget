@@ -4,7 +4,7 @@ Donate link: http://roidayan.com
 Tags: events, facebook
 Requires at least: 3.2.1
 Tested up to: 3.3.1
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 
 A widget for displaying facebook events of a fan page.
 
@@ -32,6 +32,9 @@ You need to edit the style.css file.
 2. example2
 
 == Changelog ==
+
+= 1.1.1 =
+* fixed external css issue.
 
 = 1.1.0 =
 * Option for facebook access token to access private calendar.
