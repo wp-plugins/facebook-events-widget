@@ -1,4 +1,4 @@
-=== Plugin Name ===
+=== Facebook Events Widget ===
 Contributors: roidayan
 Donate link: http://roidayan.com
 Tags: events, facebook
