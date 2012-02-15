@@ -6,13 +6,13 @@ Description: Widget to display facebook events
 Version: 1.1.1
 Author: Roi Dayan
 Author URI: http://roidayan.com
-License: GPL2
+License: GPLv2
 
 Based on code by Mike Dalisay
   http://www.codeofaninja.com/2011/07/display-facebook-events-to-your-website.html
 
 
-Copyright 2011  Roi Dayan  (email : roi.dayan@gmail.com)
+Copyright (C) 2011, 2012  Roi Dayan  (email : roi.dayan@gmail.com)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License, version 2, as 
