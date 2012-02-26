@@ -1,10 +1,10 @@
-=== Plugin Name ===
+=== Facebook Events Widget ===
 Contributors: roidayan
 Donate link: http://roidayan.com
 Tags: events, facebook
 Requires at least: 3.2.1
 Tested up to: 3.3.1
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 
 A widget for displaying facebook events of a fan page.
 
@@ -16,9 +16,13 @@ http://www.codeofaninja.com/2011/07/display-facebook-events-to-your-website.html
 
 == Installation ==
 
-Extract the folder into your wordpress plugins directory.
-You'll have a new widget in the widgets page.
-After activating the widget you need to edit its settings.
+1. Extract the folder into your wordpress plugins directory.
+2. You'll have a new widget in the widgets page.
+3. Create a facebook app to get an app id and app secret.
+4. Add a widget to a sidebar you want.
+5. Fill in the widget settings.
+The app id and app secret are from step 3.
+
 
 == Frequently Asked Questions ==
 
@@ -32,6 +36,9 @@ You need to edit the style.css file.
 2. example2
 
 == Changelog ==
+
+= 1.1.1 =
+* fixed external css issue.
 
 = 1.1.0 =
 * Option for facebook access token to access private calendar.
