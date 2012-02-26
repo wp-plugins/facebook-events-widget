@@ -16,9 +16,13 @@ http://www.codeofaninja.com/2011/07/display-facebook-events-to-your-website.html
 
 == Installation ==
 
-Extract the folder into your wordpress plugins directory.
-You'll have a new widget in the widgets page.
-After activating the widget you need to edit its settings.
+1. Extract the folder into your wordpress plugins directory.
+2. You'll have a new widget in the widgets page.
+3. Create a facebook app to get an app id and app secret.
+4. Add a widget to a sidebar you want.
+5. Fill in the widget settings.
+The app id and app secret are from step 3.
+
 
 == Frequently Asked Questions ==
 
