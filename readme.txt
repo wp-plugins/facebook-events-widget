@@ -4,7 +4,7 @@ Donate link: http://roidayan.com
 Tags: events, facebook
 Requires at least: 3.2.1
 Tested up to: 3.3.1
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 
 A widget for displaying facebook events of a fan page.
 
@@ -13,6 +13,9 @@ A widget for displaying facebook events of a fan page.
 A widget for displaying facebook events of a fan page.
 Based on code by Mike Dalisay
 http://www.codeofaninja.com/2011/07/display-facebook-events-to-your-website.html
+
+Upgrade node: 
+If you modified style.css remember to save it before doing updates to the plugin.
 
 == Installation ==
 
@@ -36,6 +39,10 @@ You need to edit the style.css file.
 2. example2
 
 == Changelog ==
+
+= 1.1.2 =
+* fixed missing div element when there are no events.
+* fixed not accepting negative time offsets.
 
 = 1.1.1 =
 * fixed external css issue.

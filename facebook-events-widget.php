@@ -115,8 +115,8 @@ class Facebook_Events_Widget extends WP_Widget {
                     $last_sep = $this->cal_event($values, $timeOffset, $last_sep);
                 $this->create_event_div_block($values, $instance);
             }
-            echo '</div>';
         }
+        echo '</div>';
 
         echo $after_widget;
     }
@@ -264,7 +264,7 @@ class Facebook_Events_Widget extends WP_Widget {
 
     function cal_event($values, $timeOffset = 0, $last_sep = '') {
         //adjust facebook timestamp offset
-        if ($timeOffset > 0) {
+        if ($timeOffset != 0) {
             $o = $timeOffset * 3600;
             $values['start_time'] -= $o;
             $values['end_time'] -= $o;
