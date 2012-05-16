@@ -3,7 +3,7 @@
 Plugin Name: Facebook Events Widget
 Plugin URI: http://roidayan.com
 Description: Widget to display facebook events
-Version: 1.1.2
+Version: 1.1.3
 Author: Roi Dayan
 Author URI: http://roidayan.com
 License: GPLv2
@@ -331,7 +331,7 @@ class Facebook_Events_Widget extends WP_Widget {
         //will output something like this: July 30, 2015 6:30 pm
 
         //adjust facebook timestamp offset
-        if ($timeOffset > 0) {
+        if ($timeOffset != 0) {
             $o = $timeOffset * 3600;
             $values['start_time'] -= $o;
             $values['end_time'] -= $o;
