@@ -3,7 +3,7 @@
 Plugin Name: Facebook Events Widget
 Plugin URI: http://roidayan.com
 Description: Widget to display facebook events
-Version: 1.1.1
+Version: 1.1.2
 Author: Roi Dayan
 Author URI: http://roidayan.com
 License: GPLv2
