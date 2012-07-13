@@ -3,7 +3,7 @@
 Plugin Name: Facebook Events Widget
 Plugin URI: http://roidayan.com
 Description: Widget to display facebook events
-Version: 1.1.3
+Version: 1.1.4
 Author: Roi Dayan
 Author URI: http://roidayan.com
 License: GPLv2
@@ -109,10 +109,22 @@ class Facebook_Events_Widget extends WP_Widget {
         if (!empty($fqlResult)) {
             $last_sep = '';
             foreach ($fqlResult as $keys => $values) {
+                // Facebook now may reply time in format as "2012-07-21T12:00:00-400"
+                // instead of in seconds
+                if (strpos($values['start_time'], "T")) {
+                    $values['start_time'] = strtotime($values['start_time']);
+                    $values['end_time'] = strtotime($values['end_time']);
+                }
+                //adjust facebook timestamp offset
+                if ($timeOffset != 0) {
+                    $o = $timeOffset * 3600;
+                    $values['start_time'] -= $o;
+                    $values['end_time'] -= $o;
+                }
                 if ($smallPic)
                     $values['pic'] = $values['pic_small'];
                 if ($calSeparate)
-                    $last_sep = $this->cal_event($values, $timeOffset, $last_sep);
+                    $last_sep = $this->cal_event($values, $last_sep);
                 $this->create_event_div_block($values, $instance);
             }
         }
@@ -262,14 +274,7 @@ class Facebook_Events_Widget extends WP_Widget {
         return $fqlResult;
     }
 
-    function cal_event($values, $timeOffset = 0, $last_sep = '') {
-        //adjust facebook timestamp offset
-        if ($timeOffset != 0) {
-            $o = $timeOffset * 3600;
-            $values['start_time'] -= $o;
-            $values['end_time'] -= $o;
-        }
-        
+    function cal_event($values, $last_sep = '') {
         $today = false;
         $tomorrow = false;
         $this_week = false;
@@ -330,13 +335,6 @@ class Facebook_Events_Widget extends WP_Widget {
         //The pattern string I used 'l, F d, Y g:i a'
         //will output something like this: July 30, 2015 6:30 pm
 
-        //adjust facebook timestamp offset
-        if ($timeOffset != 0) {
-            $o = $timeOffset * 3600;
-            $values['start_time'] -= $o;
-            $values['end_time'] -= $o;
-        }
-
         //getting 'start' and 'end' date,
         //'l, F d, Y' pattern string will give us
         //something like: Thursday, July 30, 2015
@@ -394,4 +392,4 @@ class Facebook_Events_Widget extends WP_Widget {
 
 // register the widget
 add_action('widgets_init',
-    create_function('', "return register_widget('Facebook_Events_Widget');"));
+            create_function('', "return register_widget('Facebook_Events_Widget');"));
