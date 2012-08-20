@@ -3,7 +3,7 @@
 Plugin Name: Facebook Events Widget
 Plugin URI: http://roidayan.com
 Description: Widget to display facebook events
-Version: 1.1.4
+Version: 1.1.5
 Author: Roi Dayan
 Author URI: http://roidayan.com
 License: GPLv2
@@ -109,28 +109,33 @@ class Facebook_Events_Widget extends WP_Widget {
         if (!empty($fqlResult)) {
             $last_sep = '';
             foreach ($fqlResult as $keys => $values) {
-                // Facebook now may reply time in format as "2012-07-21T12:00:00-400"
-                // instead of in seconds
-                if (strpos($values['start_time'], "T")) {
-                    $values['start_time'] = strtotime($values['start_time']);
-                    $values['end_time'] = strtotime($values['end_time']);
-                }
-                //adjust facebook timestamp offset
-                if ($timeOffset != 0) {
-                    $o = $timeOffset * 3600;
-                    $values['start_time'] -= $o;
-                    $values['end_time'] -= $o;
-                }
+                $values['start_time'] = $this->fix_time($values['start_time'], $timeOffset);
+                $values['end_time'] = $this->fix_time($values['end_time'], $timeOffset);
+                
                 if ($smallPic)
                     $values['pic'] = $values['pic_small'];
                 if ($calSeparate)
                     $last_sep = $this->cal_event($values, $last_sep);
+                
                 $this->create_event_div_block($values, $instance);
             }
         }
         echo '</div>';
 
         echo $after_widget;
+    }
+    
+    function fix_time($tm, $offset) {
+        // Facebook may reply time in format as "2012-07-21" or "2012-07-21T12:00:00-400"
+        // instead of unixtime. end time can be empty.
+        $ntm = $tm;
+        if (!empty($tm)) {
+            if (strpos($ntm, "-"))
+                $ntm = strtotime($ntm);
+            if ($offset != 0)
+                $ntm -= $offset * 3600;
+        }
+        return $ntm;
     }
 
     function update($new_instance, $old_instance) {
@@ -349,9 +354,13 @@ class Facebook_Events_Widget extends WP_Widget {
 
         //with localization
         $start_date = date_i18n(get_option('date_format'), $values['start_time']);
-        $end_date = date_i18n(get_option('date_format'), $values['end_time']);
         $start_time = date_i18n(get_option('time_format'), $values['start_time']);
-        $end_time = date_i18n(get_option('time_format'), $values['end_time']);
+        
+        if (!empty($values['end_time'])) {
+            $end_date = date_i18n(get_option('date_format'), $values['end_time']);
+            $end_time = date_i18n(get_option('time_format'), $values['end_time']);
+        } else
+            $end_date = "";
         
         $event_url = 'http://www.facebook.com/event.php?eid=' . $values['eid'];
 
@@ -377,7 +386,9 @@ class Facebook_Events_Widget extends WP_Widget {
             //so we will have a format something like:
             //July 30, 2013 9:00 pm to Wednesday, July 31, 2013 at 1:00 am
             //$on = "$start_date $start_time <br> $end_date $end_time";
-            $on = "{$start_date} -<br>{$end_date}";
+            $on = "{$start_date}";
+            if (!empty($end_date))
+                $on .= "-<br>{$end_date}";
         }
         echo "<div class='fb-event-time'>{$on}</div>";
         if (!empty($values['location']))
