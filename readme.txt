@@ -4,7 +4,7 @@ Donate link: http://roidayan.com
 Tags: events, facebook
 Requires at least: 3.2.1
 Tested up to: 3.3.1
-Stable tag: 1.1.5
+Stable tag: 1.1.6
 
 A widget for displaying facebook events of a fan page.
 
@@ -39,6 +39,10 @@ You need to edit the style.css file.
 2. example2
 
 == Changelog ==
+
+= 1.1.6 =
+* fix not displaying times for events
+* added new checkbox for old timestamps. if your using an old app id and you notice events from the past then you should mark this.
 
 = 1.1.5 =
 * fix parsing events timestamps

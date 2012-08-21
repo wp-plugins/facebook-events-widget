@@ -3,7 +3,7 @@
 Plugin Name: Facebook Events Widget
 Plugin URI: http://roidayan.com
 Description: Widget to display facebook events
-Version: 1.1.5
+Version: 1.1.6
 Author: Roi Dayan
 Author URI: http://roidayan.com
 License: GPLv2
@@ -42,7 +42,7 @@ if (!class_exists('Facebook')) {
     require_once('fb-sdk/src/facebook.php');
 }
 
-class Facebook_Events_Widget extends WP_Widget {
+class Facebook_Events_Widget extends WP_Widget {  
     var $default_settings = array(
         'title' => '',
         'pageId' => '',
@@ -54,7 +54,8 @@ class Facebook_Events_Widget extends WP_Widget {
         'futureEvents' => false,
         'timeOffset' => 7,
         'newWindow' => false,
-        'calSeparate' => false
+        'calSeparate' => false,
+        'useUnixtime' => false
         );
 
     function Facebook_Events_Widget() {
@@ -101,7 +102,7 @@ class Facebook_Events_Widget extends WP_Widget {
             echo $before_title . $title . $after_title;
 
         $fqlResult = $this->query_fb_page_events($appId, $appSecret, $pageId,
-                        $accessToken, $maxEvents, $futureEvents);
+                        $accessToken, $maxEvents, $futureEvents, $useUnixtime);
 
         echo '<div class="fb-events-container">';
         
@@ -126,8 +127,8 @@ class Facebook_Events_Widget extends WP_Widget {
     }
     
     function fix_time($tm, $offset) {
-        // Facebook may reply time in format as "2012-07-21" or "2012-07-21T12:00:00-400"
-        // instead of unixtime. end time can be empty.
+        // Facebook old reply is unixtime and new reply is "2012-07-21" or "2012-07-21T12:00:00-400"
+        // on new replys end_time could be empty
         $ntm = $tm;
         if (!empty($tm)) {
             if (strpos($ntm, "-"))
@@ -185,6 +186,7 @@ class Facebook_Events_Widget extends WP_Widget {
         $this->create_input('timeOffset', $timeOffset, 'Adjust events times in hours:', 'number');
         $this->create_input('newWindow', $newWindow, 'Open events in new window:', 'checkbox');
         $this->create_input('calSeparate', $calSeparate, 'Show calendar separators:', 'checkbox');
+        $this->create_input('useUnixtime', $useUnixtime, 'old timestamps:', 'checkbox');
         
         echo '*To edit the style you need to edit the style.css file.<br/><br/>';
     }
@@ -232,7 +234,7 @@ class Facebook_Events_Widget extends WP_Widget {
         echo ' /></label></p>';
     }
 
-    function query_fb_page_events($appId, $appSecret, $pageId, $accessToken, $maxEvents, $futureOnly=false) {
+    function query_fb_page_events($appId, $appSecret, $pageId, $accessToken, $maxEvents, $futureOnly=false, $use_unixtime=false) {
         //initializing keys
         $facebook = new Facebook(array(
             'appId'  => $appId,
@@ -241,18 +243,12 @@ class Facebook_Events_Widget extends WP_Widget {
         ));
 
         //query the events
-        //we will select name, start_time, end_time, location, description this time
-        //but there are other data that you can get on the event table (https://developers.facebook.com/docs/reference/fql/event/)
-        //as you've noticed, we have TWO select statement here
-        //since we can't just do "WHERE creator = your_fan_page_id".
-        //only eid is indexable in the event table, sow we have to retrieve
-        //list of events by eids
-        //and this was achieved by selecting all eid from
-        //event_member table where the uid is the id of your fanpage.
-        //*yes, you fanpage automatically becomes an event_member
-        //once it creates an event
-
-        $future = $futureOnly ? 'AND start_time > now()' : '';
+        
+        if ($use_unixtime)
+            $future = $futureOnly ? ' AND start_time > now() ' : '';
+        else
+            $future = $futureOnly ? ' AND start_time > "' . date("Y-m-d") . '" ' : '';
+        
         $maxEvents = intval($maxEvents) <= 0 ? 1 : intval($maxEvents);
         $fql = "SELECT eid, name, pic, pic_small, start_time, end_time, location, description 
             FROM event WHERE eid IN ( SELECT eid FROM event_member 
@@ -335,32 +331,34 @@ class Facebook_Events_Widget extends WP_Widget {
     
     function create_event_div_block($values, $instance) {
         extract($instance, EXTR_SKIP);
-        
-        //see here http://php.net/manual/en/function.date.php for the date format I used
-        //The pattern string I used 'l, F d, Y g:i a'
-        //will output something like this: July 30, 2015 6:30 pm
 
-        //getting 'start' and 'end' date,
-        //'l, F d, Y' pattern string will give us
-        //something like: Thursday, July 30, 2015
-        //$start_date = date( 'l, F d, Y', $values['start_time'] );
-        //$end_date = date( 'l, F d, Y', $values['end_time'] );
-
-        //getting 'start' and 'end' time
-        //'g:i a' will give us something
-        //like 6:30 pm
-        //$start_time = date( 'G:i', $values['start_time'] );
-        //$end_time = date( 'G:i', $values['end_time'] );
-
-        //with localization
         $start_date = date_i18n(get_option('date_format'), $values['start_time']);
-        $start_time = date_i18n(get_option('time_format'), $values['start_time']);
+        if (date("His", $values['start_time']) != "000000")
+            $start_time = date_i18n(get_option('time_format'), $values['start_time']);
+        else
+            $start_time = "";
         
         if (!empty($values['end_time'])) {
             $end_date = date_i18n(get_option('date_format'), $values['end_time']);
-            $end_time = date_i18n(get_option('time_format'), $values['end_time']);
-        } else
+            if (date("His", $values['end_time']) != "000000")
+                $end_time = date_i18n(get_option('time_format'), $values['end_time']);
+            else
+                $end_time = "";
+        } else {
             $end_date = "";
+            $end_time = "";
+        }
+        
+        if ($start_date == $end_date)
+            $end_date = "";
+        
+        $on = "$start_date";
+        if (!empty($start_time))
+            $on .= " &#183; $start_time";
+        if (($start_date != $end_date) && !empty($end_date))
+            $on .= " -<br>$end_date";
+        if (!empty($end_time))
+            $on .= " &#183; $end_time";
         
         $event_url = 'http://www.facebook.com/event.php?eid=' . $values['eid'];
 
@@ -372,24 +370,6 @@ class Facebook_Events_Widget extends WP_Widget {
         echo '><div>';
         echo "<img src={$values['pic']} />";
         echo "<div class='fb-event-title'>{$values['name']}</div>";
-        if ($start_date == $end_date) {
-            //if $start_date and $end_date is the same
-            //it means the event will happen on the same day
-            //so we will have a format something like:
-            //July 30, 2015 - 6:30 pm to 9:30 pm
-            //$on = $start_date . "<br>" . $start_time . " - " . $end_time;
-            $on = "{$start_date} &#183; {$start_time} - {$end_time}";
-        } else {
-            //else if $start_date and $end_date is NOT the equal
-            //it means that the event will will be
-            //extended to another day
-            //so we will have a format something like:
-            //July 30, 2013 9:00 pm to Wednesday, July 31, 2013 at 1:00 am
-            //$on = "$start_date $start_time <br> $end_date $end_time";
-            $on = "{$start_date}";
-            if (!empty($end_date))
-                $on .= "-<br>{$end_date}";
-        }
         echo "<div class='fb-event-time'>{$on}</div>";
         if (!empty($values['location']))
             echo "<div class='fb-event-location'>" . $values['location'] . "</div>";
