@@ -3,7 +3,7 @@
 Plugin Name: Facebook Events Widget
 Plugin URI: http://roidayan.com
 Description: Widget to display facebook events
-Version: 1.1.7
+Version: 1.1.8
 Author: Roi Dayan
 Author URI: http://roidayan.com
 License: GPLv2
@@ -129,16 +129,19 @@ class Facebook_Events_Widget extends WP_Widget {
     }
     
     function fix_time($tm, $offset) {
-        // Facebook old reply is unixtime and new reply is "2012-07-21" or "2012-07-21T12:00:00-400"
+        // Facebook old reply is unixtime and new reply is "2012-07-21" or "2012-07-21T12:00:00-0400"
         // on new replys end_time could be empty
-        $ntm = $tm;
-        if (!empty($tm)) {
-            if (strpos($ntm, "-"))
-                $ntm = strtotime($ntm);
+        if (!$tm)
+            return $tm;
+        if (ctype_digit($tm)) {
+            $n = $tm;
             if ($offset != 0)
-                $ntm -= $offset * 3600;
+                $n -= $offset * 3600;
+        } else {
+            $r = new DateTime($tm);
+            $n = $r->format('U') + $r->getOffset();
         }
-        return $ntm;
+        return $n;
     }
 
     function update($new_instance, $old_instance) {

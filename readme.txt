@@ -4,7 +4,7 @@ Donate link: http://roidayan.com
 Tags: events, facebook
 Requires at least: 3.2.1
 Tested up to: 3.3.1
-Stable tag: 1.1.7
+Stable tag: 1.1.8
 
 A widget for displaying facebook events of a fan page.
 
@@ -39,6 +39,9 @@ You need to edit the style.css file.
 2. example2
 
 == Changelog ==
+
+= 1.1.8 =
+* fix event times with daylight saving times.
 
 = 1.1.7 =
 * displaying no events message where there are no events.
