@@ -4,7 +4,7 @@ Donate link: http://roidayan.com
 Tags: events, facebook
 Requires at least: 3.2.1
 Tested up to: 3.3.1
-Stable tag: 1.1.8
+Stable tag: 1.1.9
 
 A widget for displaying facebook events of a fan page.
 
@@ -39,6 +39,14 @@ You need to edit the style.css file.
 2. example2
 
 == Changelog ==
+
+= 1.1.9 =
+* fixed missing future events
+* added option to use graph api instead of fql.
+with the graph api it is possible to access groups events
+and not just fan page events.
+when using graph api then currently the following options
+are not relevent: small picture, future events only,
 
 = 1.1.8 =
 * fix event times with daylight saving times.

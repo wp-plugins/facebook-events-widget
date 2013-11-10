@@ -55,7 +55,8 @@ class Facebook_Events_Widget extends WP_Widget {
         'timeOffset' => 7,
         'newWindow' => false,
         'calSeparate' => false,
-        'useUnixtime' => false
+        'useUnixtime' => false,
+        'useGraphapi' => false
         );
 
     function Facebook_Events_Widget() {
@@ -101,9 +102,13 @@ class Facebook_Events_Widget extends WP_Widget {
         if ($title)
             echo $before_title . $title . $after_title;
 
-        $fqlResult = $this->query_fb_page_events($appId, $appSecret, $pageId,
+        if ($useGraphapi) {
+            $fqlResult = $this->query_fb_events($appId, $appSecret, $pageId,
                         $accessToken, $maxEvents, $futureEvents, $useUnixtime);
-
+        } else {
+            $fqlResult = $this->query_fb_page_events($appId, $appSecret, $pageId,
+                        $accessToken, $maxEvents, $futureEvents, $useUnixtime);
+        }
         echo '<div class="fb-events-container">';
         
         # looping through retrieved data
@@ -113,8 +118,13 @@ class Facebook_Events_Widget extends WP_Widget {
                 $values['start_time'] = $this->fix_time($values['start_time'], $timeOffset);
                 $values['end_time'] = $this->fix_time($values['end_time'], $timeOffset);
                 
-                if ($smallPic)
-                    $values['pic'] = $values['pic_small'];
+                if ($useGraphapi) {
+                    $values['eid'] = $values['id'];
+                    $values['pic'] = $values['picture']['data']['url'];
+                } else {
+                    if ($smallPic)
+                        $values['pic'] = $values['pic_small'];
+                }
                 if ($calSeparate)
                     $last_sep = $this->cal_event($values, $last_sep);
                 
@@ -192,6 +202,7 @@ class Facebook_Events_Widget extends WP_Widget {
         $this->create_input('newWindow', $newWindow, 'Open events in new window:', 'checkbox');
         $this->create_input('calSeparate', $calSeparate, 'Show calendar separators:', 'checkbox');
         $this->create_input('useUnixtime', $useUnixtime, 'old timestamps:', 'checkbox');
+        $this->create_input('useGraphapi', $useGraphapi, 'Use graph api:', 'checkbox');
         
         echo '*To edit the style you need to edit the style.css file.<br/><br/>';
     }
@@ -238,7 +249,36 @@ class Facebook_Events_Widget extends WP_Widget {
             echo ' style="width: '.$width.'px;"';
         echo ' /></label></p>';
     }
+    
+    function query_fb_events($appId, $appSecret, $groupId, $accessToken,
+            $maxEvents, $futureOnly=false, $use_unixtime=false)
+    {
+        //initializing keys
+        $facebook = new Facebook(array(
+            'appId'  => $appId,
+            'secret' => $appSecret,
+            'cookie' => true // enable optional cookie support
+        ));
+    
+        $p = array(
+            "fields" => "id,name,picture,start_time,end_time,location"
+        );
+        
+        if (!empty($accessToken))
+            $p["access_token"] = $accessToken;
+        
+        $url = "/{$groupId}/events";
 
+        try {
+            $fqlResult = $facebook->api($url, 'GET', $p);
+            $fqlResult = $fqlResult['data'];
+        } catch (Exception $e) {
+            echo 'Caught exception: ',  $e->getMessage(), "\n";
+        }
+        
+        return $fqlResult;
+    }
+    
     function query_fb_page_events($appId, $appSecret, $pageId, $accessToken, $maxEvents, $futureOnly=false, $use_unixtime=false) {
         //initializing keys
         $facebook = new Facebook(array(
@@ -257,8 +297,9 @@ class Facebook_Events_Widget extends WP_Widget {
         $maxEvents = intval($maxEvents) <= 0 ? 1 : intval($maxEvents);
         $fql = "SELECT eid, name, pic, pic_small, start_time, end_time, location, description 
             FROM event WHERE eid IN ( SELECT eid FROM event_member 
-            WHERE uid = '{$pageId}' ) {$future}
-            ORDER BY start_time ASC LIMIT {$maxEvents}";
+            WHERE uid = '{$pageId}' ORDER BY start_time DESC
+            LIMIT {$maxEvents} ) {$future}
+            ORDER BY start_time ASC ";
         
         $param = array (
             'method' => 'fql.query',
