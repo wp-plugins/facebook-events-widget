@@ -3,7 +3,7 @@
 Plugin Name: Facebook Events Widget
 Plugin URI: http://roidayan.com
 Description: Widget to display facebook events
-Version: 1.1.9
+Version: 1.1.10
 Author: Roi Dayan
 Author URI: http://roidayan.com
 License: GPLv2
@@ -296,9 +296,11 @@ class Facebook_Events_Widget extends WP_Widget {
         
         $maxEvents = intval($maxEvents) <= 0 ? 1 : intval($maxEvents);
         $fql = "SELECT eid, name, pic, pic_small, start_time, end_time, location, description 
-            FROM event WHERE eid IN ( SELECT eid FROM event_member 
-            WHERE uid = '{$pageId}' ORDER BY start_time DESC
-            LIMIT {$maxEvents} ) {$future}
+            FROM event WHERE eid IN 
+            (   SELECT eid FROM event_member 
+                WHERE uid = '{$pageId}' {$future} ORDER BY start_time ASC
+                LIMIT {$maxEvents}
+            )
             ORDER BY start_time ASC ";
         
         $param = array (
