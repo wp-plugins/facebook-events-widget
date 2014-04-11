@@ -3,8 +3,8 @@ Contributors: roidayan
 Donate link: http://roidayan.com
 Tags: events, facebook
 Requires at least: 3.2.1
-Tested up to: 3.3.1
-Stable tag: 1.1.10
+Tested up to: 3.8.1
+Stable tag: 1.1.11
 
 A widget for displaying facebook events of a fan page.
 
@@ -39,6 +39,9 @@ You need to edit the style.css file.
 2. example2
 
 == Changelog ==
+= 1.1.11 =
+* fixed graph api return future events first. now reversing it when going over the results.
+  thanks topherjamessf.
 
 = 1.1.10 =
 * fixed showing event too far in the future and not next events.
