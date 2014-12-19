@@ -3,7 +3,7 @@ Contributors: roidayan
 Donate link: http://roidayan.com
 Tags: events, facebook
 Requires at least: 3.2.1
-Tested up to: 3.8.1
+Tested up to: 4.0
 Stable tag: 1.1.11
 
 A widget for displaying facebook events of a fan page.
