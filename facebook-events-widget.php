@@ -15,7 +15,7 @@ Based on code by Mike Dalisay
 Copyright (C) 2011, 2012  Roi Dayan  (email : roi.dayan@gmail.com)
 
     This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License, version 2, as 
+    it under the terms of the GNU General Public License, version 2, as
     published by the Free Software Foundation.
 
     This program is distributed in the hope that it will be useful,
@@ -42,7 +42,7 @@ if (!class_exists('Facebook')) {
     require_once('fb-sdk/src/facebook.php');
 }
 
-class Facebook_Events_Widget extends WP_Widget {  
+class Facebook_Events_Widget extends WP_Widget {
     var $default_settings = array(
         'title' => '',
         'pageId' => '',
@@ -69,16 +69,16 @@ class Facebook_Events_Widget extends WP_Widget {
             'width' => '',
             'height' => ''
             );
-        
+
         $this->WP_Widget('facebook_events_widget',
             __('Facebook Events Widget'), $widget_ops, $control_ops);
-            
+
         //$this->admin_url = admin_url('admin.php?page=' . urlencode(plugin_basename(__FILE__)));
         $this->admin_url = admin_url('widgets.php');
-        
+
         add_action('init', array($this, 'add_style'));
     }
-    
+
     function add_style() {
         if (!is_admin()) {
             wp_enqueue_style('facebook-events',
@@ -110,14 +110,14 @@ class Facebook_Events_Widget extends WP_Widget {
                         $accessToken, $maxEvents, $futureEvents, $useUnixtime);
         }
         echo '<div class="fb-events-container">';
-        
+
         # looping through retrieved data
         if (!empty($fqlResult)) {
             $last_sep = '';
             foreach ($fqlResult as $keys => $values) {
                 $values['start_time'] = $this->fix_time($values['start_time'], $timeOffset);
                 $values['end_time'] = $this->fix_time($values['end_time'], $timeOffset);
-                
+
                 if ($useGraphapi) {
                     $values['eid'] = $values['id'];
                     $values['pic'] = $values['picture']['data']['url'];
@@ -127,17 +127,17 @@ class Facebook_Events_Widget extends WP_Widget {
                 }
                 if ($calSeparate)
                     $last_sep = $this->cal_event($values, $last_sep);
-                
+
                 $this->create_event_div_block($values, $instance);
             }
         } else
             $this->create_noevents_div_block();
-        
+
         echo '</div>';
 
         echo $after_widget;
     }
-    
+
     function fix_time($tm, $offset) {
         // Facebook old reply is unixtime and new reply is "2012-07-21" or "2012-07-21T12:00:00-0400"
         // on new replys end_time could be empty
@@ -176,16 +176,16 @@ class Facebook_Events_Widget extends WP_Widget {
         $this->create_input('pageId', $pageId, 'Facebook Page ID:');
         $this->create_input('appId', $appId, 'Facebook App ID:');
         $this->create_input('appSecret', $appSecret, 'Facebook App secret:');
-        
+
         if (!empty($appId) && !empty($appSecret) && empty($accessToken) &&
             isset($_GET['wid']) && isset($_GET['code']) && $_GET['wid'] == $this->id)
         {
             $accessToken = $this->get_facebook_access_token($appId, $appSecret, $_GET['code']);
         }
-        
+
         $this->create_input('accessToken', $accessToken, 'Access token:');
         echo '*Only needed if calendar is private.<br/><br/>';
-        
+
         if (empty($access_token)) {
             echo '<p><a class="button-secondary" ';
             echo 'href="https://www.facebook.com/dialog/oauth?client_id=';
@@ -194,7 +194,7 @@ class Facebook_Events_Widget extends WP_Widget {
             echo '&scope=' . urlencode('offline_access,user_events') . '">';
             echo __('Get facebook access token') . '</a></p>';
         }
-        
+
         $this->create_input('maxEvents', $maxEvents, 'Maximum Events:', 'number');
         $this->create_input('smallPic', $smallPic, 'Use Small Picture:', 'checkbox');
         $this->create_input('futureEvents', $futureEvents, 'Show Future Events Only:', 'checkbox');
@@ -203,10 +203,10 @@ class Facebook_Events_Widget extends WP_Widget {
         $this->create_input('calSeparate', $calSeparate, 'Show calendar separators:', 'checkbox');
         $this->create_input('useUnixtime', $useUnixtime, 'old timestamps:', 'checkbox');
         $this->create_input('useGraphapi', $useGraphapi, 'Use graph api:', 'checkbox');
-        
+
         echo '*To edit the style you need to edit the style.css file.<br/><br/>';
     }
-    
+
     function get_facebook_access_token($appId, $appSecret, $code) {
         $request = new WP_Http;
         $api_url = 'https://graph.facebook.com/oauth/access_token?client_id='
@@ -231,25 +231,25 @@ class Facebook_Events_Widget extends WP_Widget {
         }
         return $token[1];
     }
-    
+
     function create_input($key, $value, $title, $type='text') {
         $name = $this->get_field_name($key);
         $id = $this->get_field_id($key);
         echo '<p><label for="' . $id . '">' . __($title);
         echo '&nbsp;<input id="' . $id . '" name="' . $name . '" type="' . $type . '"';
-        $width = 80;
-        if ($type == 'number')
-            $width = 35;
+
+        if ($type == 'number') {
+            echo ' style="width: 80px;"';
+		}
+
         if ($type == 'checkbox') {
             checked( (bool) $value, true);
-            $width = 0;
-        } else
+        } else {
             echo ' value="' . $value . '"';
-        if ($width > 0)
-            echo ' style="width: '.$width.'px;"';
+		}
         echo ' /></label></p>';
     }
-    
+
     function query_fb_events($appId, $appSecret, $groupId, $accessToken,
             $maxEvents, $futureOnly=false, $use_unixtime=false)
     {
@@ -259,14 +259,14 @@ class Facebook_Events_Widget extends WP_Widget {
             'secret' => $appSecret,
             'cookie' => true // enable optional cookie support
         ));
-    
+
         $p = array(
             "fields" => "id,name,picture,start_time,end_time,location"
         );
-        
+
         if (!empty($accessToken))
             $p["access_token"] = $accessToken;
-        
+
         $url = "/{$groupId}/events";
 
         try {
@@ -275,10 +275,10 @@ class Facebook_Events_Widget extends WP_Widget {
         } catch (Exception $e) {
             echo 'Caught exception: ',  $e->getMessage(), "\n";
         }
-        
+
         return $fqlResult;
     }
-    
+
     function query_fb_page_events($appId, $appSecret, $pageId, $accessToken, $maxEvents, $futureOnly=false, $use_unixtime=false) {
         //initializing keys
         $facebook = new Facebook(array(
@@ -288,27 +288,27 @@ class Facebook_Events_Widget extends WP_Widget {
         ));
 
         //query the events
-        
+
         if ($use_unixtime)
             $future = $futureOnly ? ' AND start_time > now() ' : '';
         else
             $future = $futureOnly ? ' AND start_time > "' . date("Y-m-d") . '" ' : '';
-        
+
         $maxEvents = intval($maxEvents) <= 0 ? 1 : intval($maxEvents);
-        $fql = "SELECT eid, name, pic, pic_small, start_time, end_time, location, description 
-            FROM event WHERE eid IN 
-            (   SELECT eid FROM event_member 
+        $fql = "SELECT eid, name, pic, pic_small, start_time, end_time, location, description
+            FROM event WHERE eid IN
+            (   SELECT eid FROM event_member
                 WHERE uid = '{$pageId}' {$future} ORDER BY start_time ASC
                 LIMIT {$maxEvents}
             )
             ORDER BY start_time ASC ";
-        
+
         $param = array (
             'method' => 'fql.query',
             'query' => $fql,
             'callback' => ''
         );
-        
+
         if (!empty($accessToken))
             $param['access_token'] = $accessToken;
 
@@ -331,13 +331,13 @@ class Facebook_Events_Widget extends WP_Widget {
 
         if (date('Ymd') == date('Ymd', $values['start_time']))
             $today = true;
-            
+
         if (date('Ymd') == date('Ymd', $values['start_time'] - 86400))
             $tomorrow = true;
 
         if (date('Ym') == date('Ym', $values['start_time'])) {
             $this_month = true;
-            
+
             if (( date('j', $values['start_time']) - date('j') ) < 7) {
                 if (date('w', $values['start_time']) >= date('w') ||
                     date('w', $values['start_time']) == 0)
@@ -348,9 +348,9 @@ class Facebook_Events_Widget extends WP_Widget {
                 }
             }
         }
-        
+
         $month = date('F', $values['start_time']);
-        
+
         if ($today) {
             $t = 'Today';
             $r = 'today';
@@ -367,16 +367,16 @@ class Facebook_Events_Widget extends WP_Widget {
             $t = $month;
             $r = $month;
         }
-        
+
         if ($r != $last_sep) {
             echo '<div class="fb-event-cal-head">';
             echo $t;
             echo '</div>';
         }
-        
+
         return $r;
     }
-    
+
     function create_event_div_block($values, $instance) {
         extract($instance, EXTR_SKIP);
 
@@ -385,7 +385,7 @@ class Facebook_Events_Widget extends WP_Widget {
             $start_time = date_i18n(get_option('time_format'), $values['start_time']);
         else
             $start_time = "";
-        
+
         if (!empty($values['end_time'])) {
             $end_date = date_i18n(get_option('date_format'), $values['end_time']);
             if (date("His", $values['end_time']) != "000000")
@@ -396,10 +396,10 @@ class Facebook_Events_Widget extends WP_Widget {
             $end_date = "";
             $end_time = "";
         }
-        
+
         if ($start_date == $end_date)
             $end_date = "";
-        
+
         $on = "$start_date";
         if (!empty($start_time))
             $on .= " &#183; $start_time";
@@ -407,7 +407,7 @@ class Facebook_Events_Widget extends WP_Widget {
             $on .= " -<br>$end_date";
         if (!empty($end_time))
             $on .= " &#183; $end_time";
-        
+
         $event_url = 'http://www.facebook.com/event.php?eid=' . $values['eid'];
 
         //printing the data
@@ -427,7 +427,7 @@ class Facebook_Events_Widget extends WP_Widget {
         echo "</div></a>";
         echo "</div>";
     }
-    
+
     function create_noevents_div_block() {
         echo "<div class='fb-event'>";
         echo "<div class='fb-event-description'>There are no events</div>";
