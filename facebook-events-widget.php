@@ -2,8 +2,8 @@
 /*
 Plugin Name: Facebook Events Widget
 Plugin URI: http://roidayan.com
-Description: Widget to display facebook events
-Version: 1.1.11
+Description: Widget to display events from Facebook page or group
+Version: 1.9
 Author: Roi Dayan
 Author URI: http://roidayan.com
 License: GPLv2
@@ -12,7 +12,7 @@ Based on code by Mike Dalisay
   http://www.codeofaninja.com/2011/07/display-facebook-events-to-your-website.html
 
 
-Copyright (C) 2011, 2012  Roi Dayan  (email : roi.dayan@gmail.com)
+Copyright (C) 2011, 2012-2015  Roi Dayan  (email : roi.dayan@gmail.com)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License, version 2, as
@@ -64,8 +64,7 @@ class Facebook_Events_Widget extends WP_Widget {
         'timeOffset' => 7,
         'newWindow' => false,
         'calSeparate' => false,
-        'useUnixtime' => false,
-        'useGraphapi' => false
+        'useUnixtime' => false
         );
 
     function Facebook_Events_Widget() {
@@ -104,24 +103,24 @@ class Facebook_Events_Widget extends WP_Widget {
             $this->default_settings
         );
         extract($instance, EXTR_SKIP);
+		
         $title = apply_filters('widget_title', empty($title) ? 'Facebook Events' : $title);
+		
         //$all_events_url = "http://www.facebook.com/pages/{$pageId}/?sk=events";
 
 		FacebookSession::setDefaultApplication($appId, $appSecret);
 
         echo $before_widget;
-        if ($title)
+		
+        if ( $title ) {
             echo $before_title . $title . $after_title;
+		}
 
-        //if ($useGraphapi) {
-            $data = $this->query_fb_events($pageId, $accessToken, $maxEvents, $futureEvents, $useUnixtime);
-        //} else {
-        //    $fqlResult = $this->query_fb_page_events($appId, $appSecret, $pageId,
-        //                $accessToken, $maxEvents, $futureEvents, $useUnixtime);
-        //}
+		$data = $this->query_fb_events($pageId, $accessToken, $maxEvents, $futureEvents, $useUnixtime);
+        
         echo '<div class="fb-events-container">';
 
-        # looping through retrieved data
+        /* looping through retrieved data */
         if ( ! empty($data) ) {
             $last_sep = '';
 
@@ -214,36 +213,9 @@ class Facebook_Events_Widget extends WP_Widget {
         $this->create_input('newWindow', $newWindow, 'Open events in new window:', 'checkbox');
         $this->create_input('calSeparate', $calSeparate, 'Show calendar separators:', 'checkbox');
         $this->create_input('useUnixtime', $useUnixtime, 'old timestamps:', 'checkbox');
-        $this->create_input('useGraphapi', $useGraphapi, 'Use graph api:', 'checkbox');
 
         echo '*To edit the style you need to edit the style.css file.<br/><br/>';
     }
-
-    // function get_facebook_access_token($appId, $appSecret, $code) {
-        // $request = new WP_Http;
-        // $api_url = 'https://graph.facebook.com/oauth/access_token?client_id='
-                // . urlencode($appId).'&redirect_uri='
-                // . urlencode($this->admin_url . '?wid=' . $this->id)
-                // . '&client_secret=' . urlencode($appSecret)
-                // . '&code=' . urlencode($code);
-        // $response = $request->get($api_url);
-        // if (isset($response->errors))
-            // return false;
-        // $json_response = json_decode($response['body']);
-        // if (is_object($json_response) &&
-            // property_exists($json_response,'error'))
-        // {
-            // echo '<p style="color: red;">Error getting access token.</p>';
-            // return false;
-        // }
-        // $token = explode('=', $response['body'], 2);
-        // if ($token[0] != 'access_token') {
-            // echo '<p style="color: red;">Error with access token.</p>';
-            // return false;
-        // }
-        // return $token[1];
-    // }
-
 
     function get_facebook_access_token() {
 		$token = '';
@@ -441,5 +413,6 @@ class Facebook_Events_Widget extends WP_Widget {
 }
 
 // register the widget
-add_action('widgets_init',
-            create_function('', "return register_widget('Facebook_Events_Widget');"));
+add_action( 'widgets_init', function(){
+	register_widget( 'Facebook_Events_Widget' );
+});

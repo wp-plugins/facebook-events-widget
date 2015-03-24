@@ -1,16 +1,16 @@
 === Facebook Events Widget ===
 Contributors: roidayan
 Donate link: http://roidayan.com
-Tags: events, facebook
+Tags: events, Facebook, fanpage, group
 Requires at least: 3.2.1
-Tested up to: 4.0
-Stable tag: 1.1.11
+Tested up to: 4.1
+Stable tag: 1.9
 
-A widget for displaying facebook events of a fan page.
+Widget to display events from Facebook page or group
 
 == Description ==
 
-A widget for displaying facebook events of a fan page.
+Widget to display events from Facebook page or group
 Based on code by Mike Dalisay
 http://www.codeofaninja.com/2011/07/display-facebook-events-to-your-website.html
 
@@ -39,6 +39,9 @@ You need to edit the style.css file.
 2. example2
 
 == Changelog ==
+= 1.9 =
+* updated fb sdk to v4 and using graph api v2.2 only
+
 = 1.1.11 =
 * fixed graph api return future events first. now reversing it when going over the results.
   thanks topherjamessf.
