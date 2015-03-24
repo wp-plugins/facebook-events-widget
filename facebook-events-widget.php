@@ -59,12 +59,11 @@ class Facebook_Events_Widget extends WP_Widget {
         'appSecret' => '',
         'accessToken' => '',
         'maxEvents' => 10,
-        'smallPic' => false,
+        //'smallPic' => false,
         'futureEvents' => false,
         'timeOffset' => 7,
         'newWindow' => false,
-        'calSeparate' => false,
-        'useUnixtime' => false
+        'calSeparate' => false
         );
 
     function Facebook_Events_Widget() {
@@ -103,28 +102,28 @@ class Facebook_Events_Widget extends WP_Widget {
             $this->default_settings
         );
         extract($instance, EXTR_SKIP);
-		
+
         $title = apply_filters('widget_title', empty($title) ? 'Facebook Events' : $title);
-		
+
         //$all_events_url = "http://www.facebook.com/pages/{$pageId}/?sk=events";
 
 		FacebookSession::setDefaultApplication($appId, $appSecret);
 
         echo $before_widget;
-		
+
         if ( $title ) {
             echo $before_title . $title . $after_title;
 		}
 
-		$data = $this->query_fb_events($pageId, $accessToken, $maxEvents, $futureEvents, $useUnixtime);
-        
+		$data = $this->query_fb_events( $pageId, $accessToken, $maxEvents, $futureEvents );
+
         echo '<div class="fb-events-container">';
 
-        /* looping through retrieved data */
-        if ( ! empty($data) ) {
+        /* loop through retrieved data */
+        if ( ! empty( $data ) ) {
             $last_sep = '';
 
-            foreach ($data as $idx => $event) {
+            foreach ( $data as $idx => $event ) {
 				$event = (array) $event;
                 $event['start_time'] = $this->fix_time($event['start_time'], $timeOffset);
                 $event['end_time'] = $this->fix_time($event['end_time'], $timeOffset);
@@ -207,12 +206,11 @@ class Facebook_Events_Widget extends WP_Widget {
         }
 
         $this->create_input('maxEvents', $maxEvents, 'Maximum Events:', 'number');
-        $this->create_input('smallPic', $smallPic, 'Use Small Picture:', 'checkbox');
+        //$this->create_input('smallPic', $smallPic, 'Use Small Picture:', 'checkbox');
         $this->create_input('futureEvents', $futureEvents, 'Show Future Events Only:', 'checkbox');
         $this->create_input('timeOffset', $timeOffset, 'Adjust events times in hours:', 'number');
         $this->create_input('newWindow', $newWindow, 'Open events in new window:', 'checkbox');
         $this->create_input('calSeparate', $calSeparate, 'Show calendar separators:', 'checkbox');
-        $this->create_input('useUnixtime', $useUnixtime, 'old timestamps:', 'checkbox');
 
         echo '*To edit the style you need to edit the style.css file.<br/><br/>';
     }
@@ -260,7 +258,7 @@ class Facebook_Events_Widget extends WP_Widget {
         echo ' /></label></p>';
     }
 
-    function query_fb_events($pageId, $accessToken, $maxEvents, $futureOnly=false, $use_unixtime=false) {
+    function query_fb_events( $pageId, $accessToken, $maxEvents, $futureOnly ) {
 		if ( empty( $accessToken ) ) {
 			echo "Missing access token";
 			return false;
@@ -268,7 +266,17 @@ class Facebook_Events_Widget extends WP_Widget {
 
 		$session = new FacebookSession( $accessToken );
 		$g = false;
-		$url = "/{$pageId}/events";
+
+		if ( $futureOnly ) {
+			$hour = 12;
+			$today = strtotime("$hour:00:00");
+			$yesterday = strtotime("-1 day", $today);
+			$since = $yesterday;
+		} else {
+			$since = 1;
+		}
+		/* adding since=1 will get more results without fetching the next page */
+		$url = "/{$pageId}/events?since={$since}";
         $p = array(
             "fields" => "id,name,picture,start_time,end_time,location"
         );
@@ -280,22 +288,30 @@ class Facebook_Events_Widget extends WP_Widget {
 			$g = $response->getGraphObject();
 		} catch (FacebookRequestException $e) {
 			// The Graph API returned an error
-			echo "ERROR";
-			var_dump($e);
+			echo "<strong>ERROR:</strong> " . $e->getMessage();
 		} catch (\Exception $e) {
 			// Some other error occurred
-			echo "ERROR2";
-			var_dump($e);
+			echo "<strong>ERROR:</strong> " . $e->getMessage();
 		}
 
-		$data = $g->getProperty('data')->asArray();
-		//var_dump($data);
+		$data = $g->getProperty('data');
+		if ( $data ) {
+			$data = $data->asArray();
+		}
 
-		$response = $response->getRequestForNextPage()->execute();
-		$g = $response->getGraphObject();
-		$data2 = $g->getProperty('data')->asArray();
+		if ( count($data) < $maxEvents ) {
+			$response = $response->getRequestForNextPage();
+			if ($response) {
+				$response = $response->execute();
+				$g = $response->getGraphObject();
+				$more = $g->getProperty('data')->asArray();
+				$data = array_merge($data, $more);
+			}
+		}
 
-		$data = array_merge($data, $data2);
+		if ( $data ) {
+			$data = array_slice( $data, 0, $maxEvents );
+		}
 
         return $data;
     }

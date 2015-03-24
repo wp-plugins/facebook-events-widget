@@ -23,6 +23,7 @@
 }
 .fb-event img {
     float: left;
+	padding-right: 5px;
 }
 .fb-event-title {
     font-size: 16px;
