@@ -4,7 +4,7 @@ Donate link: http://roidayan.com
 Tags: events, Facebook, fanpage, group
 Requires at least: 3.2.1
 Tested up to: 4.1
-Stable tag: 1.9
+Stable tag: 1.9.1
 
 Widget to display events from Facebook page or group
 
@@ -39,6 +39,10 @@ You need to edit the style.css file.
 2. example2
 
 == Changelog ==
+= 1.9.1 =
+* fix getting access token
+* when requesting future only events show asc order
+
 = 1.9 =
 * updated fb sdk to v4 and using graph api v2.2 only
 

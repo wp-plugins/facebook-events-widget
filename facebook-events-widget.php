@@ -3,7 +3,7 @@
 Plugin Name: Facebook Events Widget
 Plugin URI: http://roidayan.com
 Description: Widget to display events from Facebook page or group
-Version: 1.9
+Version: 1.9.1
 Author: Roi Dayan
 Author URI: http://roidayan.com
 License: GPLv2
@@ -105,8 +105,6 @@ class Facebook_Events_Widget extends WP_Widget {
 
         $title = apply_filters('widget_title', empty($title) ? 'Facebook Events' : $title);
 
-        //$all_events_url = "http://www.facebook.com/pages/{$pageId}/?sk=events";
-
 		FacebookSession::setDefaultApplication($appId, $appSecret);
 
         echo $before_widget;
@@ -181,33 +179,36 @@ class Facebook_Events_Widget extends WP_Widget {
         extract($instance, EXTR_SKIP);
 
 		if ( !empty($appId) && !empty($appSecret) ) {
+
 			FacebookSession::setDefaultApplication( $appId, $appSecret );
 
-			if ( isset( $_GET['wid'] ) && $_GET['wid'] == $this->id ) {
-				$accessToken = $this->get_facebook_access_token( $accessToken );
+			if ( empty( $accessToken ) ) {
+				$accessToken = $this->get_facebook_access_token();
 			}
 		}
 
         $title = htmlspecialchars($instance['title']);
-
         $this->create_input('title', $title, 'Title:');
         $this->create_input('pageId', $pageId, 'Facebook Page ID:');
         $this->create_input('appId', $appId, 'Facebook App ID:');
         $this->create_input('appSecret', $appSecret, 'Facebook App secret:');
-        $this->create_input('accessToken', $accessToken, 'Access token:');
-        echo '*Only needed if calendar is private.<br/><br/>';
+		$this->create_input('accessToken', $accessToken, 'Access token:');
 
-        if ( empty($accessToken) &&  !empty($appId) && !empty($appSecret) ) {
+		if ( empty($accessToken) && !empty($appId) && !empty($appSecret) ) {
 
 			$loginUrl = $this->_fb_login_url;
 
-            echo '<p><a class="button-secondary" href="' . $loginUrl . '">' .
-				__('Get Facebook access token') . '</a></p>';
+			if ( isset($loginUrl) ) {
+				echo '<p><a class="button-secondary" href="' . $loginUrl . '">' .
+					__('Get Facebook access token') . '</a></p>';
+			} else {
+				echo "<strong>ERROR:</strong> failed to get Facebook login url.";
+			}
         }
 
         $this->create_input('maxEvents', $maxEvents, 'Maximum Events:', 'number');
         //$this->create_input('smallPic', $smallPic, 'Use Small Picture:', 'checkbox');
-        $this->create_input('futureEvents', $futureEvents, 'Show Future Events Only:', 'checkbox');
+        $this->create_input('futureEvents', $futureEvents, 'Show future events only:', 'checkbox');
         $this->create_input('timeOffset', $timeOffset, 'Adjust events times in hours:', 'number');
         $this->create_input('newWindow', $newWindow, 'Open events in new window:', 'checkbox');
         $this->create_input('calSeparate', $calSeparate, 'Show calendar separators:', 'checkbox');
@@ -221,20 +222,22 @@ class Facebook_Events_Widget extends WP_Widget {
 		$helper = new FacebookRedirectLoginHelper( $redir_url );
 
 		try {
+
 			$session = $helper->getSessionFromRedirect();
+
+			if ( isset( $session ) ) {
+				$token = $session->getToken();
+			} else {
+				$scope = array( 'offline_access', 'user_events' );
+				$this->_fb_login_url = $helper->getLoginUrl( $scope );
+			}
+
 		} catch(FacebookRequestException $e) {
 			// When Facebook returns an error
 			echo "<strong>ERROR:</strong> " . $e->getMessage();
 		} catch(\Exception $e) {
 			// When validation fails or other local issues
 			echo "<strong>ERROR:</strong> " . $e->getMessage();
-		}
-
-		if ( isset( $session ) ) {
-			$token = $session->getToken();
-		} else {
-			$scope = array( 'offline_access', 'user_events' );
-			$this->_fb_login_url = $helper->getLoginUrl( $scope );
 		}
 
 		return $token;
@@ -259,11 +262,6 @@ class Facebook_Events_Widget extends WP_Widget {
     }
 
     function query_fb_events( $pageId, $accessToken, $maxEvents, $futureOnly ) {
-		if ( empty( $accessToken ) ) {
-			echo "Missing access token";
-			return false;
-		}
-
 		$session = new FacebookSession( $accessToken );
 		$g = false;
 
@@ -294,23 +292,35 @@ class Facebook_Events_Widget extends WP_Widget {
 			echo "<strong>ERROR:</strong> " . $e->getMessage();
 		}
 
+		if ( ! $g ) {
+			return false;
+		}
+
 		$data = $g->getProperty('data');
 		if ( $data ) {
 			$data = $data->asArray();
 		}
 
-		if ( count($data) < $maxEvents ) {
+		if ( ! $futureOnly && count( $data ) < $maxEvents ) {
 			$response = $response->getRequestForNextPage();
-			if ($response) {
+			if ( $response ) {
 				$response = $response->execute();
 				$g = $response->getGraphObject();
-				$more = $g->getProperty('data')->asArray();
-				$data = array_merge($data, $more);
+				var_dump($g);
+				$more = $g->getProperty('data');
+				if ( $more ) {
+					$more = $more->asArray();
+					$data = array_merge($data, $more);
+				}
 			}
 		}
 
 		if ( $data ) {
 			$data = array_slice( $data, 0, $maxEvents );
+
+			if ( $futureOnly ) {
+				$data = array_reverse( $data );
+			}
 		}
 
         return $data;
