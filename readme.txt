@@ -4,7 +4,7 @@ Donate link: http://roidayan.com
 Tags: events, Facebook, fanpage, group
 Requires at least: 3.2.1
 Tested up to: 4.1
-Stable tag: 1.9.1
+Stable tag: 1.9.2
 
 Widget to display events from Facebook page or group
 

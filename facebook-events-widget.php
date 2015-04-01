@@ -3,7 +3,7 @@
 Plugin Name: Facebook Events Widget
 Plugin URI: http://roidayan.com
 Description: Widget to display events from Facebook page or group
-Version: 1.9.1
+Version: 1.9.2
 Author: Roi Dayan
 Author URI: http://roidayan.com
 License: GPLv2
@@ -276,13 +276,12 @@ class Facebook_Events_Widget extends WP_Widget {
 		/* adding since=1 will get more results without fetching the next page */
 		$url = "/{$pageId}/events?since={$since}";
         $p = array(
-            "fields" => "id,name,picture,start_time,end_time,location"
+            "fields" => "id,name,picture,start_time,end_time,place"
         );
 
 		try {
-			$response = (new FacebookRequest(
-					$session, 'GET', $url, $p
-					))->execute();
+			$request = new FacebookRequest( $session, 'GET', $url, $p, 'v2.3' );
+			$response = $request->execute();
 			$g = $response->getGraphObject();
 		} catch (FacebookRequestException $e) {
 			// The Graph API returned an error
@@ -422,10 +421,13 @@ class Facebook_Events_Widget extends WP_Widget {
         echo "<img src={$values['pic']} />";
         echo "<div class='fb-event-title'>{$values['name']}</div>";
         echo "<div class='fb-event-time'>{$on}</div>";
-        if (!empty($values['location']))
-            echo "<div class='fb-event-location'>" . $values['location'] . "</div>";
-        if (!empty($values['description']))
+		
+        if ( ! empty( $values['place'] ) )
+            echo "<div class='fb-event-location'>" . $values['place']->name . "</div>";
+		
+        if ( ! empty( $values['description'] ) )
             echo "<div class='fb-event-description'>" . nl2br($values['description']) . "</div>";
+		
         //echo "<div style='clear: both'></div>";
         echo "</div></a>";
         echo "</div>";
