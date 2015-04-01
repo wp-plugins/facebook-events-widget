@@ -11,8 +11,11 @@ Widget to display events from Facebook page or group
 == Description ==
 
 Widget to display events from Facebook page or group
+
 Based on code by Mike Dalisay
 http://www.codeofaninja.com/2011/07/display-facebook-events-to-your-website.html
+
+Version 1.9 requires PHP 5.4 or up.
 
 Upgrade note: 
 If you modified style.css remember to save it before doing updates to the plugin.
@@ -33,12 +36,17 @@ The app id and app secret are from step 3.
 
 You need to edit the style.css file.
 
+
 == Screenshots ==
 
 1. example
 2. example2
 
+
 == Changelog ==
+= 1.9.2 =
+* use graph api v2.3
+
 = 1.9.1 =
 * fix getting access token
 * when requesting future only events show asc order
