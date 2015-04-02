@@ -3,7 +3,7 @@
 Plugin Name: Facebook Events Widget
 Plugin URI: http://roidayan.com
 Description: Widget to display events from Facebook page or group
-Version: 1.9.3
+Version: 1.9.4
 Author: Roi Dayan
 Author URI: http://roidayan.com
 License: GPLv2
@@ -51,7 +51,11 @@ use Facebook\FacebookRedirectLoginHelper;
 use Facebook\FacebookSDKException;
 
 
+define( 'FBEVENTS_TD', 'fbevents' );
+
+
 class Facebook_Events_Widget extends WP_Widget {
+
     var $default_settings = array(
         'title' => '',
         'pageId' => '',
@@ -59,7 +63,6 @@ class Facebook_Events_Widget extends WP_Widget {
         'appSecret' => '',
         'accessToken' => '',
         'maxEvents' => 10,
-        //'smallPic' => false,
         'futureEvents' => false,
         'timeOffset' => 7,
         'newWindow' => false,
@@ -70,15 +73,16 @@ class Facebook_Events_Widget extends WP_Widget {
         // constructor
         $widget_ops = array(
             'classname' => 'widget_Facebook_Events_Widget',
-            'description' => __('Display facebook events.')
+            'description' => __('Display facebook events.', FBEVENTS_TD)
             );
+
         $control_ops = array(
             'width' => '',
             'height' => ''
             );
 
         $this->WP_Widget('facebook_events_widget',
-            __('Facebook Events Widget'), $widget_ops, $control_ops);
+            __('Facebook Events Widget', FBEVENTS_TD), $widget_ops, $control_ops);
 
         //$this->admin_url = admin_url('admin.php?page=' . urlencode(plugin_basename(__FILE__)));
         $this->admin_url = admin_url('widgets.php');
@@ -103,7 +107,7 @@ class Facebook_Events_Widget extends WP_Widget {
         );
         extract($instance, EXTR_SKIP);
 
-        $title = apply_filters('widget_title', empty($title) ? 'Facebook Events' : $title);
+        $title = apply_filters( 'widget_title', empty($title) ? __('Facebook Events', FBEVENTS_TD) : $title );
 
 		FacebookSession::setDefaultApplication($appId, $appSecret);
 
@@ -127,9 +131,6 @@ class Facebook_Events_Widget extends WP_Widget {
                 $event['end_time'] = $this->fix_time($event['end_time'], $timeOffset);
 				$event['eid'] = $event['id'];
 				$event['pic'] = $event['picture']->data->url;
-				// if ( $smallPic ) {
-					// $event['pic'] .= '?type=small';
-				// }
 
                 if ( $calSeparate ) {
                     $last_sep = $this->cal_event($event, $last_sep);
@@ -188,11 +189,11 @@ class Facebook_Events_Widget extends WP_Widget {
 		}
 
         $title = htmlspecialchars($instance['title']);
-        $this->create_input('title', $title, 'Title:');
-        $this->create_input('pageId', $pageId, 'Facebook Page ID:');
-        $this->create_input('appId', $appId, 'Facebook App ID:');
-        $this->create_input('appSecret', $appSecret, 'Facebook App secret:');
-		$this->create_input('accessToken', $accessToken, 'Access token:');
+        $this->create_input('title', $title, __( 'Title:', FBEVENTS_TD ) );
+        $this->create_input('pageId', $pageId, __( 'Facebook Page ID:', FBEVENTS_TD ) );
+        $this->create_input('appId', $appId, __( 'Facebook App ID:', FBEVENTS_TD ) );
+        $this->create_input('appSecret', $appSecret, __( 'Facebook App secret:', FBEVENTS_TD ) );
+		$this->create_input('accessToken', $accessToken, __( 'Access token:', FBEVENTS_TD ) );
 
 		if ( empty($accessToken) && !empty($appId) && !empty($appSecret) ) {
 
@@ -200,20 +201,20 @@ class Facebook_Events_Widget extends WP_Widget {
 
 			if ( isset($loginUrl) ) {
 				echo '<p><a class="button-secondary" href="' . $loginUrl . '">' .
-					__('Get Facebook access token') . '</a></p>';
+					__('Get Facebook access token', FBEVENTS_TD) . '</a></p>';
 			} else {
-				echo "<strong>ERROR:</strong> failed to get Facebook login url.";
+				_e( "<strong>ERROR:</strong> failed to get Facebook login url.", FBEVENTS_TD );
 			}
         }
 
-        $this->create_input('maxEvents', $maxEvents, 'Maximum Events:', 'number');
-        //$this->create_input('smallPic', $smallPic, 'Use Small Picture:', 'checkbox');
-        $this->create_input('futureEvents', $futureEvents, 'Show future events only:', 'checkbox');
-        $this->create_input('timeOffset', $timeOffset, 'Adjust events times in hours:', 'number');
-        $this->create_input('newWindow', $newWindow, 'Open events in new window:', 'checkbox');
-        $this->create_input('calSeparate', $calSeparate, 'Show calendar separators:', 'checkbox');
+        $this->create_input('maxEvents', $maxEvents, __( 'Maximum Events:', FBEVENTS_TD ), 'number' );
+        $this->create_input('futureEvents', $futureEvents, __( 'Show future events only:', FBEVENTS_TD ), 'checkbox');
+        $this->create_input('timeOffset', $timeOffset, __( 'Adjust events times in hours:', FBEVENTS_TD ), 'number');
+        $this->create_input('newWindow', $newWindow, __( 'Open events in new window:', FBEVENTS_TD ), 'checkbox');
+        $this->create_input('calSeparate', $calSeparate, __( 'Show calendar separators:', FBEVENTS_TD ), 'checkbox');
 
-        echo '*To edit the style you need to edit the style.css file.<br/><br/>';
+        _e( '*To edit the style you need to edit the style.css file.', FBEVENTS_TD );
+		echo '<br/><br/>';
     }
 
     function get_facebook_access_token() {
@@ -356,16 +357,16 @@ class Facebook_Events_Widget extends WP_Widget {
         $month = date('F', $values['start_time']);
 
         if ($today) {
-            $t = 'Today';
+            $t = __( 'Today', FBEVENTS_TD );
             $r = 'today';
         } else if ($tomorrow) {
-            $t = 'Tomorrow';
+            $t = __( 'Tomorrow', FBEVENTS_TD );
             $r = 'tomorrow';
         } else if ($this_week) {
-            $t = 'This Week';
+            $t = __( 'This Week', FBEVENTS_TD );
             $r = 'thisweek';
         } else if ($this_month) {
-            $t = 'This Month';
+            $t = __( 'This Month', FBEVENTS_TD );
             $r = 'thismonth';
         } else {
             $t = $month;
@@ -417,8 +418,10 @@ class Facebook_Events_Widget extends WP_Widget {
         //printing the data
         echo "<div class='fb-event'>";
         echo '<a class="fb-event-anchor" href="' . $event_url . '"';
-        if ($newWindow)
+
+        if ( $newWindow )
             echo ' target="_blank"';
+
         echo '><div>';
         echo "<img src={$values['pic']} />";
         echo "<div class='fb-event-title'>{$values['name']}</div>";
@@ -437,7 +440,7 @@ class Facebook_Events_Widget extends WP_Widget {
 
     function create_noevents_div_block() {
         echo "<div class='fb-event'>";
-        echo "<div class='fb-event-description'>There are no events</div>";
+        echo "<div class='fb-event-description'>" . __( 'There are no events', FBEVENTS_TD ) . "</div>";
         echo "</div>";
     }
 }
@@ -446,3 +449,9 @@ class Facebook_Events_Widget extends WP_Widget {
 add_action( 'widgets_init', function(){
 	register_widget( 'Facebook_Events_Widget' );
 });
+
+function fbevents_load_text_domain() {
+	load_plugin_textdomain( FBEVENTS_TD, false, dirname(  __FILE__ ) . '/languages/' );
+}
+
+add_action( 'plugins_loaded', 'fbevents_load_text_domain' );
