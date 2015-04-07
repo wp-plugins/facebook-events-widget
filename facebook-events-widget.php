@@ -262,26 +262,43 @@ class Facebook_Events_Widget extends WP_Widget {
         echo ' /></label></p>';
     }
 
+	function get_next_events( $response, &$data ) {
+		$request = $response->getRequestForNextPage();
+
+		if ( $request ) {
+			$response = $request->execute();
+			$g = $response->getGraphObject();
+			$data2 = $g->getProperty('data');
+
+			if ( $data2 ) {
+				$data2 = $data2->asArray();
+				$data = array_merge( $data, $data2 );
+			}
+		} else {
+			$response = NULL;
+		}
+
+		return $response;
+	}
+
     function query_fb_events( $pageId, $accessToken, $maxEvents, $futureOnly ) {
 		$session = new FacebookSession( $accessToken );
 		$g = false;
+		$now = time();
 
 		if ( $futureOnly ) {
-			$hour = 12;
-			$today = strtotime("$hour:00:00");
-			$yesterday = strtotime("-1 day", $today);
-			$since = $yesterday;
+			$since = $now;
 		} else {
 			$since = 1;
 		}
 		/* adding since=1 will get more results without fetching the next page */
 		$url = "/{$pageId}/events?since={$since}";
         $p = array(
-            "fields" => "id,name,picture,start_time,end_time,place"
+            "fields" => "id,name,picture,start_time,end_time,location"
         );
 
 		try {
-			$request = new FacebookRequest( $session, 'GET', $url, $p, 'v2.3' );
+			$request = new FacebookRequest( $session, 'GET', $url, $p, 'v2.2' );
 			$response = $request->execute();
 			$g = $response->getGraphObject();
 		} catch (FacebookRequestException $e) {
@@ -302,27 +319,28 @@ class Facebook_Events_Widget extends WP_Widget {
 		}
 
 		if ( ! $futureOnly && count( $data ) < $maxEvents ) {
-			$response = $response->getRequestForNextPage();
+			$request = $response->getRequestForNextPage();
+			$response = $this->get_next_events( $response, $data );
+		}
 
-			if ( $response ) {
+		/**
+		 * graph api shows future first and we might need more pages to get current events
+		 */
+		if ( $futureOnly ) {
+			$oldest = end( $data );
+			$start_time = strtotime( $oldest->start_time );
 
-				$response = $response->execute();
-				$g = $response->getGraphObject();
-				$more = $g->getProperty('data');
-
-				if ( $more ) {
-					$more = $more->asArray();
-					$data = array_merge($data, $more);
-				}
+			while ( $response && $start_time > $now ) {
+				$response = $this->get_next_events( $response, $data );
 			}
 		}
 
 		if ( $data ) {
-			$data = array_slice( $data, 0, $maxEvents );
-
 			if ( $futureOnly ) {
 				$data = array_reverse( $data );
 			}
+
+			$data = array_slice( $data, 0, $maxEvents );
 		}
 
         return $data;
@@ -427,8 +445,8 @@ class Facebook_Events_Widget extends WP_Widget {
         echo "<div class='fb-event-title'>{$values['name']}</div>";
         echo "<div class='fb-event-time'>{$on}</div>";
 
-        if ( ! empty( $values['place'] ) )
-            echo "<div class='fb-event-location'>" . $values['place']->name . "</div>";
+        if ( ! empty( $values['location'] ) )
+            echo "<div class='fb-event-location'>" . $values['location'] . "</div>";
 
         if ( ! empty( $values['description'] ) )
             echo "<div class='fb-event-description'>" . nl2br($values['description']) . "</div>";
