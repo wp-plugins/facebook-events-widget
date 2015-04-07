@@ -4,7 +4,7 @@ Donate link: http://roidayan.com
 Tags: events, Facebook, fanpage, group
 Requires at least: 3.2.1
 Tested up to: 4.1
-Stable tag: 1.9.4
+Stable tag: 1.9.5
 
 Widget to display events from Facebook page or group
 
@@ -44,6 +44,10 @@ You need to edit the style.css file.
 
 
 == Changelog ==
+= 1.9.5 =
+* use graph api v2.2 as using the next page api doesn't pass the version and default seems v2.2
+* fix showing current events when there are many future events
+
 = 1.9.4 =
 * add translation support and en pot file
 
