@@ -1,7 +1,7 @@
 .fb-events-container {
     overflow: auto;
     overflow-x: hidden;
-    height: 300px;
+    max-height: 600px;
 }
 .fb-event {
     background-color: #E3E3E3;
@@ -46,4 +46,8 @@
     border-bottom: none;
     font-weight: bold;
     line-height: 1.28;
+}
+
+.fb-event-desc > div {
+	margin-left: 60px;
 }
