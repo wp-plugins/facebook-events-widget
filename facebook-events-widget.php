@@ -3,7 +3,7 @@
 Plugin Name: Facebook Events Widget
 Plugin URI: http://roidayan.com
 Description: Widget to display events from Facebook page or group
-Version: 1.9.6
+Version: 1.9.7
 Author: Roi Dayan
 Author URI: http://roidayan.com
 License: GPLv2
@@ -117,15 +117,16 @@ class Facebook_Events_Widget extends WP_Widget {
             echo $before_title . $title . $after_title;
 		}
 
-		$data = $this->query_fb_events( $pageId, $accessToken, $maxEvents, $futureEvents );
+		$events = $this->query_fb_events( $pageId, $accessToken, $maxEvents, $futureEvents );
 
         echo '<div class="fb-events-container">';
 
-        /* loop through retrieved data */
-        if ( ! empty( $data ) ) {
+        if ( ! empty( $events ) ) {
             $last_sep = '';
+			$first_future_event = null;
+			$first_past_event = null;
 
-            foreach ( $data as $idx => $event ) {
+            foreach ( $events as $event ) {
 				$event = (array) $event;
                 $event['start_time'] = $this->fix_time($event['start_time'], $timeOffset);
                 $event['end_time'] = $this->fix_time($event['end_time'], $timeOffset);
@@ -133,7 +134,17 @@ class Facebook_Events_Widget extends WP_Widget {
 				$event['pic'] = $event['picture']->data->url;
 
                 if ( $calSeparate ) {
-                    $last_sep = $this->cal_event($event, $last_sep);
+					$time = isset( $event['end_time'] ) ? $event['end_time'] : $event['start_time'];
+
+					if ( ! $first_future_event && $time > time() ) {
+						$first_future_event = $event;
+						echo '<div class="fb-event-cal-head">' . __( 'Upcoming events', FBEVENTS_TD ) . '</div>';
+					} else if ( ! $first_past_event && $time < time() ) {
+						$first_past_event = $event;
+						echo '<div class="fb-event-cal-head">' . __( 'Past events', FBEVENTS_TD ) . '</div>';
+					}
+
+                    $last_sep = $this->event_separator($event, $last_sep);
 				}
 
                 $this->create_event_div_block($event, $instance);
@@ -286,13 +297,12 @@ class Facebook_Events_Widget extends WP_Widget {
 		$g = false;
 		$now = time();
 
-		if ( $futureOnly ) {
-			$since = $now;
-		} else {
-			$since = 1;
-		}
-		/* adding since=1 will get more results without fetching the next page */
-		$url = "/{$pageId}/events?since={$since}";
+		/* this will filter out events that started but still on going */
+		//if ( $futureOnly ) {
+		//	$since = $now;
+		//}
+
+		$url = "/{$pageId}/events";
         $p = array(
             "fields" => "id,name,picture,start_time,end_time,location"
         );
@@ -314,58 +324,74 @@ class Facebook_Events_Widget extends WP_Widget {
 		}
 
 		$data = $g->getProperty('data');
+
+		if ( ! $data ) {
+			return array();
+		}
+
+		$data = $data->asArray();
+
 		if ( $data ) {
-			$data = $data->asArray();
-		} else {
-			$data = array();
-		}
-
-		if ( ! $futureOnly && count( $data ) < $maxEvents ) {
-			$request = $response->getRequestForNextPage();
-			$response = $this->get_next_events( $response, $data );
-		}
-
-		/**
-		 * graph api shows future first and we might need more pages to get current events
-		 */
-		if ( $data && $futureOnly ) {
 			$oldest = end( $data );
-			$start_time = strtotime( $oldest->start_time );
 
-			while ( $response && $start_time > $now ) {
+			while ( $response && count( $data ) < $maxEvents ) {
 				$response = $this->get_next_events( $response, $data );
 			}
 		}
 
-		if ( $data ) {
-			if ( $futureOnly ) {
-				$data = array_reverse( $data );
+		$future_events = array();
+		$past_events = array();
+
+		reset( $data );
+		foreach ( $data as $event ) {
+			/* filter by end_time if exists */
+			if ( isset( $event->end_time ) ) {
+				$time = strtotime( $event->end_time );
+			} else {
+				$time = strtotime( $event->start_time );
 			}
 
-			$data = array_slice( $data, 0, $maxEvents );
+			if ( $now < $time ) {
+				$future_events[] = $event;
+			} else {
+				$past_events[] = $event;
+			}
 		}
+
+		$future_events = array_reverse( $future_events );
+
+		if ( $futureOnly ) {
+			$data = $future_events;
+		} else {
+			$data = array_merge( $future_events, $past_events );
+		}
+
+		$data = array_slice( $data, 0, $maxEvents );
 
         return $data;
     }
 
-    function cal_event($values, $last_sep = '') {
+    function event_separator( $event, $last_sep = '' ) {
         $today = false;
         $tomorrow = false;
         $this_week = false;
         $this_month = false;
 
-        if (date('Ymd') == date('Ymd', $values['start_time']))
+		//$time = isset( $event['end_time'] ) ? $event['end_time'] : $event['start_time'];
+		$time = $event['start_time'];
+
+        if (date('Ymd') == date('Ymd', $time))
             $today = true;
 
-        if (date('Ymd') == date('Ymd', $values['start_time'] - 86400))
+        if (date('Ymd') == date('Ymd', $time - 86400))
             $tomorrow = true;
 
-        if (date('Ym') == date('Ym', $values['start_time'])) {
+        if (date('Ym') == date('Ym', $time)) {
             $this_month = true;
 
-            if (( date('j', $values['start_time']) - date('j') ) < 7) {
-                if (date('w', $values['start_time']) >= date('w') ||
-                    date('w', $values['start_time']) == 0)
+            if (( date('j', $time) - date('j') ) < 7) {
+                if (date('w', $time) >= date('w') ||
+                    date('w', $time) == 0)
                 {
                     // comparing to 0 because seems its 0-6 where sunday is 1 and saturday is 0
                     // docs says otherwise.. need to check,
@@ -374,7 +400,7 @@ class Facebook_Events_Widget extends WP_Widget {
             }
         }
 
-        $month = date('F', $values['start_time']);
+        $month = date('F', $time);
 
         if ($today) {
             $t = __( 'Today', FBEVENTS_TD );
@@ -434,15 +460,11 @@ class Facebook_Events_Widget extends WP_Widget {
             $on .= " &#183; $end_time";
 
         $event_url = 'http://www.facebook.com/event.php?eid=' . $values['eid'];
+        $target = $newWindow ? ' target="_blank"' : '';
 
-        //printing the data
         echo "<div class='fb-event'>";
-        echo '<a class="fb-event-anchor" href="' . $event_url . '"';
-
-        if ( $newWindow )
-            echo ' target="_blank"';
-
-        echo '><div>';
+        echo '<a class="fb-event-anchor" href="' . $event_url . '" ' . $target;
+        echo '><div class="fb-event-desc">';
         echo "<img src={$values['pic']} />";
         echo "<div class='fb-event-title'>{$values['name']}</div>";
         echo "<div class='fb-event-time'>{$on}</div>";
