@@ -37,6 +37,8 @@
 .fb-event-description {
     line-height: 10px;
 }
+.fb-event-cal-upcoming,
+.fb-event-cal-past,
 .fb-event-cal-head {
     font-size: 11px;
     color: #333;

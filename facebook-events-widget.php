@@ -143,10 +143,10 @@ class Facebook_Events_Widget extends WP_Widget {
 
 					if ( ! $first_future_event && $time > time() ) {
 						$first_future_event = $event;
-						echo '<div class="fb-event-cal-head">' . __( 'Upcoming events', FBEVENTS_TD ) . '</div>';
+						echo '<div class="fb-event-cal-upcoming">' . __( 'Upcoming events', FBEVENTS_TD ) . '</div>';
 					} else if ( ! $first_past_event && $time < time() ) {
 						$first_past_event = $event;
-						echo '<div class="fb-event-cal-head">' . __( 'Past events', FBEVENTS_TD ) . '</div>';
+						echo '<div class="fb-event-cal-past">' . __( 'Past events', FBEVENTS_TD ) . '</div>';
 					}
 
                     $last_sep = $this->event_separator($event, $last_sep);
