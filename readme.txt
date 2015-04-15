@@ -1,6 +1,6 @@
 === Facebook Events Widget ===
 Contributors: roidayan
-Donate link: http://roidayan.com
+Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SQP78SMRC8MUG
 Tags: events, Facebook, fanpage, group
 Requires at least: 3.2.1
 Tested up to: 4.1
