@@ -1,10 +1,10 @@
 === Facebook Events Widget ===
 Contributors: roidayan
-Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SQP78SMRC8MUG
+Donate link: http://roidayan.com
 Tags: events, Facebook, fanpage, group
 Requires at least: 3.2.1
 Tested up to: 4.1
-Stable tag: 1.9.8
+Stable tag: 1.9.9
 
 Widget to display events from Facebook page or group
 
@@ -44,6 +44,10 @@ You need to edit the style.css file.
 
 
 == Changelog ==
+
+= 1.9.9 =
+* fix issue with events without end time
+* fix missing events description
 
 = 1.9.8 =
 * update fb sdk to v4.0.23. default graph api is v2.3

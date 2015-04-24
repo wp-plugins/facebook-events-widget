@@ -3,7 +3,7 @@
 Plugin Name: Facebook Events Widget
 Plugin URI: http://roidayan.com
 Description: Widget to display events from Facebook page or group
-Version: 1.9.8
+Version: 1.9.9
 Author: Roi Dayan
 Author URI: http://roidayan.com
 License: GPLv2
@@ -129,7 +129,8 @@ class Facebook_Events_Widget extends WP_Widget {
             foreach ( $events as $event ) {
 				$event = (array) $event;
                 $event['start_time'] = $this->fix_time($event['start_time'], $timeOffset);
-                $event['end_time'] = $this->fix_time($event['end_time'], $timeOffset);
+				$end_time = isset( $event['end_time'] ) ? $event['end_time'] : '';
+                $event['end_time'] = $this->fix_time( $end_time, $timeOffset );
 				$event['eid'] = $event['id'];
 				$event['pic'] = $event['picture']->data->url;
 				if ( isset( $event['place'] ) ) {
@@ -162,11 +163,12 @@ class Facebook_Events_Widget extends WP_Widget {
         echo $after_widget;
     }
 
-    function fix_time($tm, $offset) {
+    function fix_time( $tm, $offset ) {
         // Facebook old reply is unixtime and new reply is "2012-07-21" or "2012-07-21T12:00:00-0400"
         // on new replys end_time could be empty
-        if (!$tm)
+        if ( ! $tm ) {
             return $tm;
+		}
         if (ctype_digit($tm)) {
             $n = $tm;
             if ($offset != 0)
@@ -309,7 +311,7 @@ class Facebook_Events_Widget extends WP_Widget {
 
 		$url = "/{$pageId}/events";
         $p = array(
-            "fields" => "id,name,picture,start_time,end_time,place"
+            'fields' => 'id,name,picture,start_time,end_time,place,description'
         );
 
 		try {
