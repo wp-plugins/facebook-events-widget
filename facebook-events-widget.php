@@ -3,7 +3,7 @@
 Plugin Name: Facebook Events Widget
 Plugin URI: http://roidayan.com
 Description: Widget to display events from Facebook page or group
-Version: 1.9.9
+Version: 1.9.10
 Author: Roi Dayan
 Author URI: http://roidayan.com
 License: GPLv2
@@ -36,6 +36,15 @@ Copyright (C) 2011, 2012-2015  Roi Dayan  (email : roi.dayan@gmail.com)
 */
 
 //error_reporting(E_ALL);
+
+if ( version_compare( PHP_VERSION, '5.4', '<' ) ) {
+	function fbevents_admin_notices() {
+		echo '<div class="error"><p> Facebook Events Widget Requires PHP >= 5.4. Current version: ' . PHP_VERSION . ' </p></div>';
+	}
+	add_action( 'admin_notices', 'fbevents_admin_notices' );
+	// stop loading this script.
+	return;
+}
 
 // requiring FB PHP SDK
 if ( ! class_exists( 'Facebook' ) ) {
@@ -500,7 +509,7 @@ add_action( 'widgets_init', function(){
 });
 
 function fbevents_load_text_domain() {
-	load_plugin_textdomain( FBEVENTS_TD, false, dirname(  __FILE__ ) . '/languages/' );
+	load_plugin_textdomain( FBEVENTS_TD, false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 }
 
 add_action( 'plugins_loaded', 'fbevents_load_text_domain' );

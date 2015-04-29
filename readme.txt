@@ -4,7 +4,7 @@ Donate link: http://roidayan.com
 Tags: events, Facebook, fanpage, group
 Requires at least: 3.2.1
 Tested up to: 4.1
-Stable tag: 1.9.9
+Stable tag: 1.9.10
 
 Widget to display events from Facebook page or group
 
@@ -44,6 +44,10 @@ You need to edit the style.css file.
 
 
 == Changelog ==
+
+= 1.9.10 =
+* fix textdomain
+* display admin error notice if php < 5.4
 
 = 1.9.9 =
 * fix issue with events without end time
