@@ -1,10 +1,10 @@
 === Facebook Events Widget ===
 Contributors: roidayan
 Donate link: http://roidayan.com
-Tags: events, Facebook, fanpage, group
+Tags: events, Facebook, fanpage, group, Facebook Events
 Requires at least: 3.2.1
-Tested up to: 4.1
-Stable tag: 1.9.10
+Tested up to: 4.2.2
+Stable tag: 1.9.11
 
 Widget to display events from Facebook page or group
 
@@ -22,12 +22,12 @@ If you modified style.css remember to save it before doing updates to the plugin
 
 == Installation ==
 
-1. Extract the folder into your wordpress plugins directory.
+1. Extract the folder into your Wordpress plugins directory.
 2. You'll have a new widget in the widgets page.
-3. Create a facebook app to get an app id and app secret.
+3. Create a Facebook app to get an app id and app secret.
 4. Add a widget to a sidebar you want.
 5. Fill in the widget settings.
-The app id and app secret are from step 3.
+   The app id and app secret are from step 3.
 
 
 == Frequently Asked Questions ==
@@ -44,6 +44,10 @@ You need to edit the style.css file.
 
 
 == Changelog ==
+
+= 1.9.11 =
+* Fix for empty events
+* some cleanup
 
 = 1.9.10 =
 * fix textdomain

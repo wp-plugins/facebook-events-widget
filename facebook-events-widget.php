@@ -3,14 +3,10 @@
 Plugin Name: Facebook Events Widget
 Plugin URI: http://roidayan.com
 Description: Widget to display events from Facebook page or group
-Version: 1.9.10
+Version: 1.9.11
 Author: Roi Dayan
 Author URI: http://roidayan.com
 License: GPLv2
-
-Based on code by Mike Dalisay
-  http://www.codeofaninja.com/2011/07/display-facebook-events-to-your-website.html
-
 
 Copyright (C) 2011, 2012-2015  Roi Dayan  (email : roi.dayan@gmail.com)
 
@@ -26,13 +22,6 @@ Copyright (C) 2011, 2012-2015  Roi Dayan  (email : roi.dayan@gmail.com)
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
-
-/* TODO
- * setting if to display more info or not
- * link to all events
- * setting for date format for one day event and event that span multiple days
- * force height for widget container
 */
 
 //error_reporting(E_ALL);
@@ -320,7 +309,8 @@ class Facebook_Events_Widget extends WP_Widget {
 
 		$url = "/{$pageId}/events";
         $p = array(
-            'fields' => 'id,name,picture,start_time,end_time,place,description'
+            'fields' => 'id,name,picture,start_time,end_time,place,description',
+			'since' => '1'
         );
 
 		try {
