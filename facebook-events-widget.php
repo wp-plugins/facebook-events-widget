@@ -3,7 +3,7 @@
 Plugin Name: Facebook Events Widget
 Plugin URI: http://roidayan.com
 Description: Widget to display events from Facebook page or group
-Version: 1.9.12
+Version: 1.9.13
 Author: Roi Dayan
 Author URI: http://roidayan.com
 License: GPLv2
@@ -64,7 +64,8 @@ class Facebook_Events_Widget extends WP_Widget {
 		'futureEvents' => false,
 		'timeOffset' => 7,
 		'newWindow' => false,
-		'calSeparate' => false
+		'calSeparate' => false,
+		'fix_events_query' => false
 	);
 
 	function __construct() {
@@ -96,14 +97,14 @@ class Facebook_Events_Widget extends WP_Widget {
 		wp_enqueue_style( 'facebook-events-css', plugin_dir_url( __FILE__ ) . 'style.css', false, '1.0' );
 	}
 
-	function widget($args, $instance) {
+	function widget( $args, $instance ) {
 		// print the widget
-		extract($args, EXTR_SKIP);
+		extract( $args, EXTR_SKIP );
 		$instance = wp_parse_args(
 			(array) $instance,
 			$this->default_settings
 		);
-		extract($instance, EXTR_SKIP);
+		extract( $instance, EXTR_SKIP );
 
 		$title = apply_filters( 'widget_title', empty($title) ? __('Facebook Events', FBEVENTS_TD) : $title );
 
@@ -115,7 +116,7 @@ class Facebook_Events_Widget extends WP_Widget {
 			echo $before_title . $title . $after_title;
 		}
 
-		$events = $this->query_fb_events( $pageId, $accessToken, $maxEvents, $futureEvents );
+		$events = $this->query_fb_events( $pageId, $accessToken, $maxEvents, $instance );
 
 		echo '<div class="fb-events-container">';
 
@@ -145,19 +146,22 @@ class Facebook_Events_Widget extends WP_Widget {
 						echo '<div class="fb-event-cal-upcoming">' . __( 'Upcoming events', FBEVENTS_TD ) . '</div>';
 					} else if ( ! $first_past_event && $time < time() ) {
 						$first_past_event = $event;
+						if ( ! $first_future_event ) {
+							echo '<div class="fb-event-no-upcoming">' . __( "There are no upcoming events", FBEVENTS_TD ) . '</div>';
+						}
 						echo '<div class="fb-event-cal-past">' . __( 'Past events', FBEVENTS_TD ) . '</div>';
 					}
 
 					$last_sep = $this->event_separator($event, $last_sep);
 				}
 
-				$this->create_event_div_block($event, $instance);
+				$this->create_event_div_block( $event, $instance );
 			}
-		} else
-			$this->create_noevents_div_block();
+		} else {
+			$this->create_text_event_div_block( __( 'There are no events', FBEVENTS_TD ) );
+		}
 
 		echo '</div>';
-
 		echo $after_widget;
 	}
 
@@ -226,6 +230,7 @@ class Facebook_Events_Widget extends WP_Widget {
 		$this->create_input('timeOffset', $timeOffset, __( 'Adjust events times in hours:', FBEVENTS_TD ), 'number');
 		$this->create_input('newWindow', $newWindow, __( 'Open events in new window:', FBEVENTS_TD ), 'checkbox');
 		$this->create_input('calSeparate', $calSeparate, __( 'Show calendar separators:', FBEVENTS_TD ), 'checkbox');
+		$this->create_input('fix_events_query', $fix_events_query, __( 'Fix events query:', FBEVENTS_TD ), 'checkbox');
 
 		_e( '*To edit the style you need to edit the style.css file.', FBEVENTS_TD );
 		echo '<br/><br/>';
@@ -258,7 +263,7 @@ class Facebook_Events_Widget extends WP_Widget {
 		return $token;
 	}
 
-	function create_input($key, $value, $title, $type='text') {
+	function create_input( $key, $value, $title, $type='text' ) {
 		$name = $this->get_field_name($key);
 		$id = $this->get_field_id($key);
 		echo '<p><label for="' . $id . '">' . __($title);
@@ -295,7 +300,27 @@ class Facebook_Events_Widget extends WP_Widget {
 		return $response;
 	}
 
-	function query_fb_events( $pageId, $accessToken, $maxEvents, $futureOnly ) {
+	function request( $session, $url, $p ) {
+		$response = false;
+
+		/* query events */
+		try {
+			$request = new FacebookRequest( $session, 'GET', $url, $p );
+			$response = $request->execute();
+		} catch (FacebookRequestException $e) {
+			// The Graph API returned an error
+			echo "<strong>ERROR:</strong> " . $e->getMessage();
+		} catch (\Exception $e) {
+			// Some other error occurred
+			echo "<strong>ERROR:</strong> " . $e->getMessage();
+		}
+
+		return $response;
+	}
+
+	function query_fb_events( $pageId, $accessToken, $maxEvents, $instance ) {
+		extract( $instance, EXTR_SKIP );
+		$futureOnly = $futureEvents;
 		$session = new FacebookSession( $accessToken );
 		$g = false;
 		$now = time();
@@ -306,22 +331,22 @@ class Facebook_Events_Widget extends WP_Widget {
 		//}
 
 		$url = "/{$pageId}/events";
+
 		$p = array(
-			'fields' => 'id,name,picture,start_time,end_time,place,description',
-			'since' => '1'
+			'fields' => 'id,name,picture,start_time,end_time,place,description'
 		);
 
-		try {
-			$request = new FacebookRequest( $session, 'GET', $url, $p );
-			$response = $request->execute();
-			$g = $response->getGraphObject();
-		} catch (FacebookRequestException $e) {
-			// The Graph API returned an error
-			echo "<strong>ERROR:</strong> " . $e->getMessage();
-		} catch (\Exception $e) {
-			// Some other error occurred
-			echo "<strong>ERROR:</strong> " . $e->getMessage();
+		if ( $fix_events_query ) {
+			$p['since'] = 1;
 		}
+
+		/* query events */
+		$response = $this->request( $session, $url, $p );
+		if ( ! $response ) {
+			return;
+		}
+
+		$g = $response->getGraphObject();
 
 		if ( ! $g ) {
 			return false;
@@ -491,10 +516,10 @@ class Facebook_Events_Widget extends WP_Widget {
 		echo "</div>";
 	}
 
-	function create_noevents_div_block() {
-		echo "<div class='fb-event'>";
-		echo "<div class='fb-event-description'>" . __( 'There are no events', FBEVENTS_TD ) . "</div>";
-		echo "</div>";
+	function create_text_event_div_block( $text ) {
+		echo '<div class="fb-event">';
+		echo '<div class="fb-event-description">' . $text . '</div>';
+		echo '</div>';
 	}
 }
 
