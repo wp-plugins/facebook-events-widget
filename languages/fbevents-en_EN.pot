@@ -2,109 +2,117 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Facebook Events Widget\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-04-10 08:46+0200\n"
-"PO-Revision-Date: 2015-04-10 08:46+0200\n"
+"POT-Creation-Date: 2015-06-07 18:01+0200\n"
+"PO-Revision-Date: 2015-06-07 18:01+0200\n"
 "Last-Translator: Roi Dayan <roi.dayan@gmail.com>\n"
 "Language-Team: Roi Dayan <roi.dayan@gmail.com>\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.5\n"
+"X-Generator: Poedit 1.7.6\n"
 "X-Poedit-Basepath: .\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPath-1: ..\n"
 
-#: ../facebook-events-widget.php:76
+#: ../facebook-events-widget.php:74
 msgid "Display facebook events."
 msgstr ""
 
-#: ../facebook-events-widget.php:85
+#: ../facebook-events-widget.php:84
 msgid "Facebook Events Widget"
 msgstr ""
 
-#: ../facebook-events-widget.php:110
+#: ../facebook-events-widget.php:109
 msgid "Facebook Events"
 msgstr ""
 
-#: ../facebook-events-widget.php:141
+#: ../facebook-events-widget.php:146
 msgid "Upcoming events"
 msgstr ""
 
-#: ../facebook-events-widget.php:144
+#: ../facebook-events-widget.php:150
+msgid "There are no upcoming events"
+msgstr ""
+
+#: ../facebook-events-widget.php:152
 msgid "Past events"
 msgstr ""
 
-#: ../facebook-events-widget.php:203
+#: ../facebook-events-widget.php:161
+msgid "There are no events"
+msgstr ""
+
+#: ../facebook-events-widget.php:212
 msgid "Title:"
 msgstr ""
 
-#: ../facebook-events-widget.php:204
+#: ../facebook-events-widget.php:213
 msgid "Facebook Page ID:"
 msgstr ""
 
-#: ../facebook-events-widget.php:205
+#: ../facebook-events-widget.php:214
 msgid "Facebook App ID:"
 msgstr ""
 
-#: ../facebook-events-widget.php:206
+#: ../facebook-events-widget.php:215
 msgid "Facebook App secret:"
 msgstr ""
 
-#: ../facebook-events-widget.php:207
+#: ../facebook-events-widget.php:216
 msgid "Access token:"
 msgstr ""
 
-#: ../facebook-events-widget.php:215
+#: ../facebook-events-widget.php:222
 msgid "Get Facebook access token"
 msgstr ""
 
-#: ../facebook-events-widget.php:217
+#: ../facebook-events-widget.php:224
 msgid "<strong>ERROR:</strong> failed to get Facebook login url."
 msgstr ""
 
-#: ../facebook-events-widget.php:221
+#: ../facebook-events-widget.php:228
 msgid "Maximum Events:"
 msgstr ""
 
-#: ../facebook-events-widget.php:222
+#: ../facebook-events-widget.php:229
 msgid "Show future events only:"
 msgstr ""
 
-#: ../facebook-events-widget.php:223
+#: ../facebook-events-widget.php:230
 msgid "Adjust events times in hours:"
 msgstr ""
 
-#: ../facebook-events-widget.php:224
+#: ../facebook-events-widget.php:231
 msgid "Open events in new window:"
 msgstr ""
 
-#: ../facebook-events-widget.php:225
+#: ../facebook-events-widget.php:232
 msgid "Show calendar separators:"
 msgstr ""
 
-#: ../facebook-events-widget.php:227
+#: ../facebook-events-widget.php:233
+msgid "Fix events query:"
+msgstr ""
+
+#: ../facebook-events-widget.php:235
 msgid "*To edit the style you need to edit the style.css file."
 msgstr ""
 
-#: ../facebook-events-widget.php:406
+#: ../facebook-events-widget.php:435
 msgid "Today"
 msgstr ""
 
-#: ../facebook-events-widget.php:409
+#: ../facebook-events-widget.php:438
 msgid "Tomorrow"
 msgstr ""
 
-#: ../facebook-events-widget.php:412
+#: ../facebook-events-widget.php:441
 msgid "This Week"
 msgstr ""
 
-#: ../facebook-events-widget.php:415
+#: ../facebook-events-widget.php:444
 msgid "This Month"
-msgstr ""
-
-#: ../facebook-events-widget.php:485
-msgid "There are no events"
 msgstr ""
