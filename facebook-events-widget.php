@@ -429,7 +429,7 @@ class Facebook_Events_Widget extends WP_Widget {
 			}
 		}
 
-		$month = date('F', $time);
+		$month = date_i18n('F', $time);
 
 		if ($today) {
 			$t = __( 'Today', FBEVENTS_TD );
