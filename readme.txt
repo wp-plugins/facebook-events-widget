@@ -3,8 +3,8 @@ Contributors: roidayan
 Donate link: http://roidayan.com
 Tags: events, Facebook, fan page, group, Facebook Events, events
 Requires at least: 3.2.1
-Tested up to: 4.2.2
-Stable tag: 1.9.13
+Tested up to: 4.3
+Stable tag: 1.9.14
 
 Widget to display events from Facebook page or group
 
@@ -44,6 +44,9 @@ You need to edit the style.css file.
 
 
 == Changelog ==
+
+= 1.9.14 =
+* Use PHP5 style class constructor
 
 = 1.9.13 =
 * Fix not showing events for some groups
