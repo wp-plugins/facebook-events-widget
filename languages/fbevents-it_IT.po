@@ -1,0 +1,119 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Facebook Events Widget\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-08-22 14:52+0100\n"
+"PO-Revision-Date: 2015-08-22 14:58+0100\n"
+"Last-Translator: Roi Dayan <roi.dayan@gmail.com>\n"
+"Language-Team: Roi Dayan <roi.dayan@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.1\n"
+"X-Poedit-Basepath: .\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-KeywordsList: __;_e\n"
+"Language: it\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: ..\n"
+
+#: ../facebook-events-widget.php:74
+msgid "Display facebook events."
+msgstr "Mostra Eventi Facebook"
+
+#: ../facebook-events-widget.php:84
+msgid "Facebook Events Widget"
+msgstr "Facebook Events Widget"
+
+#: ../facebook-events-widget.php:109
+msgid "Facebook Events"
+msgstr "Eventi Facebook"
+
+#: ../facebook-events-widget.php:146
+msgid "Upcoming events"
+msgstr "Prossimi Eventi"
+
+#: ../facebook-events-widget.php:150
+msgid "There are no upcoming events"
+msgstr "Non ci sono eventi in programma"
+
+#: ../facebook-events-widget.php:152
+msgid "Past events"
+msgstr "Eventi passati"
+
+#: ../facebook-events-widget.php:161
+msgid "There are no events"
+msgstr "Non ci sono eventi"
+
+#: ../facebook-events-widget.php:212
+msgid "Title:"
+msgstr "Titolo:"
+
+#: ../facebook-events-widget.php:213
+msgid "Facebook Page ID:"
+msgstr "Facebook Page ID:"
+
+#: ../facebook-events-widget.php:214
+msgid "Facebook App ID:"
+msgstr "Facebook App ID:"
+
+#: ../facebook-events-widget.php:215
+msgid "Facebook App secret:"
+msgstr "Facebook App secret:"
+
+#: ../facebook-events-widget.php:216
+msgid "Access token:"
+msgstr "Access token:"
+
+#: ../facebook-events-widget.php:222
+msgid "Get Facebook access token"
+msgstr "Ottieni Facebook access token"
+
+#: ../facebook-events-widget.php:224
+msgid "<strong>ERROR:</strong> failed to get Facebook login url."
+msgstr "<strong>ERRORE:</strong> impossibile ottenere l’indirizzo di login a Facebook."
+
+#: ../facebook-events-widget.php:228
+msgid "Maximum Events:"
+msgstr "Eventi massimi:"
+
+#: ../facebook-events-widget.php:229
+msgid "Show future events only:"
+msgstr "Mostra solo gli eventi futuri:"
+
+#: ../facebook-events-widget.php:230
+msgid "Adjust events times in hours:"
+msgstr "Aggiusta l’ora degli eventi in ore:"
+
+#: ../facebook-events-widget.php:231
+msgid "Open events in new window:"
+msgstr "Apri gli eventi in una nuova finestra:"
+
+#: ../facebook-events-widget.php:232
+msgid "Show calendar separators:"
+msgstr "Mostra i separatori di calendario:"
+
+#: ../facebook-events-widget.php:233
+msgid "Fix events query:"
+msgstr "Sistema la query degli eventi:"
+
+#: ../facebook-events-widget.php:235
+msgid "*To edit the style you need to edit the style.css file."
+msgstr "*Per modificare lo stile devi editare il file style.css."
+
+#: ../facebook-events-widget.php:435
+msgid "Today"
+msgstr "Oggi"
+
+#: ../facebook-events-widget.php:438
+msgid "Tomorrow"
+msgstr "Domani"
+
+#: ../facebook-events-widget.php:441
+msgid "This Week"
+msgstr "Questa settimana"
+
+# Translate by Gherard Galli
+#: ../facebook-events-widget.php:444
+msgid "This Month"
+msgstr "Questo mese"
